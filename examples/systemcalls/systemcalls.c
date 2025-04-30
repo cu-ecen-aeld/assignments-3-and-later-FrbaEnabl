@@ -76,7 +76,7 @@ bool do_exec(int count, ...)
             exit(EXIT_FAILURE); // Exit immediately if execv fails
             break;
         default:
-            printf("Child ID: %d command was: %s\n", pid, command);
+            printf("Child ID: %d\n", pid);
             int status;
             waitpid(pid, &status, 0);
             printf("STATUS IS: %d\n", status);
