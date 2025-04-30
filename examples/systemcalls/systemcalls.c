@@ -78,7 +78,7 @@ bool do_exec(int count, ...)
         default:
             printf("Child ID: %d\n", pid);
             int status;
-            wait(&status);
+            waitpid(pid, &status, 0);
             printf("STATUS IS: %d\n", status);
             if(status != 0){
                 return false;
@@ -141,7 +141,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
         printf("Child ID: ");
         printf("%d\n", pid);
         int status;
-        wait(&status);
+        waitpid(pid, &status, 0);
         close(fd);
         break;
         /* do whatever the parent wants to do. */
