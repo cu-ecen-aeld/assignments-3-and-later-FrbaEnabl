@@ -80,6 +80,9 @@ bool do_exec(int count, ...)
             printf("%d\n", pid);
             int status;
             wait(&status);
+            if(status != 0){
+                return false
+            }
             break;
     }
     va_end(args);
