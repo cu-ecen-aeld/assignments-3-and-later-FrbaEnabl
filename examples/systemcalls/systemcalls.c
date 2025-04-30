@@ -73,7 +73,7 @@ bool do_exec(int count, ...)
             printf("Print from child process...");
             int ret = execv(command[0], &command[1]);
             if(ret==-1){
-                return false
+                return false;
             }
             break;
         default:
@@ -128,8 +128,11 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
             return false;
         }
         printf("Print from child process...");
-        execv(command[0], command);
+        int ret = execv(command[0], command);
         close(fd);
+        if(ret==-1){
+            return false;
+        }
         break;
 
     default:
