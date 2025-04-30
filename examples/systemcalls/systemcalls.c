@@ -67,16 +67,16 @@ bool do_exec(int count, ...)
     int pid = fork();
     switch(pid){
         case -1:
-            printf("Error encountered");
+            printf("Error encountered\n");
             return false;
         case 0:
-            printf("Print from child process...");
+            printf("Print from child process...\n");
             execv(command[0], &command[1]);
-            perror("execv");
+            perror("execv\n");
             exit(EXIT_FAILURE); // Exit immediately if execv fails
             break;
         default:
-            printf("Child ID: ");
+            printf("Child ID: \n");
             printf("%d\n", pid);
             int status;
             wait(&status);
