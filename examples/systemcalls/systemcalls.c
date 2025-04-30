@@ -22,7 +22,7 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
-    ret = system(*cmd());
+    int ret = system(cmd);
     if(ret==-1){
         return false;
     }
@@ -64,19 +64,19 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
-    int pid = fork()
+    int pid = fork();
     switch(pid{
         case -1:
-            printf("Error encountered")
-            return false
+            printf("Error encountered");;
+            return false;
         case 0:
-            printf("Print from child process...")
+            printf("Print from child process...");
             execv(command[0], &command[1]);
             break;
         default:
-            printf("Child ID: ")
-            print("%d\n", pid)
-            wait()
+            printf("Child ID: ");
+            print("%d\n", pid);
+            wait();
             break;
     })
     va_end(args);
@@ -130,8 +130,8 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
 
     default:
         printf("Child ID: ")
-        printf("%d\n", pid)
-        wait()
+        printf("%d\n", pid);
+        wait();
         close(fd);
         break;
         /* do whatever the parent wants to do. */
