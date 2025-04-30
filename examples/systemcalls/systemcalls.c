@@ -65,9 +65,9 @@ bool do_exec(int count, ...)
  *
 */
     int pid = fork();
-    switch(pid{
+    switch(pid){
         case -1:
-            printf("Error encountered");;
+            printf("Error encountered");
             return false;
         case 0:
             printf("Print from child process...");
@@ -78,7 +78,7 @@ bool do_exec(int count, ...)
             print("%d\n", pid);
             wait();
             break;
-    })
+    }
     va_end(args);
 
     return true;
@@ -123,13 +123,13 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
             perror("dup2"); 
             return false;
         }
-        printf("Print from child process...")
+        printf("Print from child process...");
         execv(command[0], command);
         close(fd);
         break;
 
     default:
-        printf("Child ID: ")
+        printf("Child ID: ");
         printf("%d\n", pid);
         wait();
         close(fd);
