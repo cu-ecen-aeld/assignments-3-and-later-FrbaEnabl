@@ -127,7 +127,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
             return false;
         }
         printf("Print from child process...");
-        int ret = execv(command[0], command);
+        execv(command[0], command);
         close(fd);
         execv(command[0], &command[1]);
         perror("execv");
