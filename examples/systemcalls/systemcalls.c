@@ -75,8 +75,9 @@ bool do_exec(int count, ...)
             break;
         default:
             printf("Child ID: ");
-            print("%d\n", pid);
-            wait();
+            printf("%d\n", pid);
+            int status;
+            wait(&status);
             break;
     }
     va_end(args);
@@ -131,7 +132,8 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     default:
         printf("Child ID: ");
         printf("%d\n", pid);
-        wait();
+        int status;
+        wait(&status);
         close(fd);
         break;
         /* do whatever the parent wants to do. */
