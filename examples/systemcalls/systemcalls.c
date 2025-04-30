@@ -81,7 +81,7 @@ bool do_exec(int count, ...)
             waitpid(pid, &status, 0);
             printf("STATUS IS: %d\n", status);
             if(status != 0){
-                prinf("FALSE FROM STATUS")
+                prinf("FALSE FROM STATUS");
                 return false;
             }
             break;
