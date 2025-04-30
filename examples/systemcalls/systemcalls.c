@@ -71,7 +71,10 @@ bool do_exec(int count, ...)
             return false;
         case 0:
             printf("Print from child process...");
-            execv(command[0], &command[1]);
+            int ret = execv(command[0], &command[1]);
+            if(ret==-1){
+                return false
+            }
             break;
         default:
             printf("Child ID: ");
