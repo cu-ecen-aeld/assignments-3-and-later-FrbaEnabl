@@ -71,7 +71,7 @@ bool do_exec(int count, ...)
             return false;
         case 0:
             printf("Print from child process...\n");
-            execv(command[0], &command[1]);
+            execv(command[0], command);
             perror("execv\n");
             exit(EXIT_FAILURE); // Exit immediately if execv fails
             break;
