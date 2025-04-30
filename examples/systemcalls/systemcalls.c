@@ -81,7 +81,7 @@ bool do_exec(int count, ...)
             int status;
             wait(&status);
             if(status != 0){
-                return false
+                return false;
             }
             break;
     }
