@@ -80,7 +80,7 @@ bool do_exec(int count, ...)
             printf("%d\n", pid);
             int status;
             wait(&status);
-            printf("STATUS IS: %d", status);
+            printf("STATUS IS: %d\n", status);
             if(status != 0){
                 return false;
             }
