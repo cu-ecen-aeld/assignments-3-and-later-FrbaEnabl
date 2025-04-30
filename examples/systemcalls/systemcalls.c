@@ -133,7 +133,6 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
         printf("Print from child process...");
         execv(command[0], command);
         close(fd);
-        execv(command[0], &command[1]);
         perror("execv");
         exit(EXIT_FAILURE); // Exit immediately if execv fails
         break;
@@ -143,7 +142,12 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
         printf("%d\n", pid);
         int status;
         waitpid(pid, &status, 0);
+        printf("STATUS IS: %d\n", status);
         close(fd);
+        if(status != 0){
+            printf("FALSE FROM STATUS\n");
+            return false;
+        }
         break;
         /* do whatever the parent wants to do. */
     }
