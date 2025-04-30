@@ -1,5 +1,11 @@
 #include "systemcalls.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 /**
  * @param cmd the command to execute with system()
  * @return true if the command in @param cmd was executed
@@ -16,7 +22,10 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
-
+    ret = system(*cmd());
+    if(ret==-1){
+        return false;
+    }
     return true;
 }
 
@@ -45,9 +54,6 @@ bool do_exec(int count, ...)
         command[i] = va_arg(args, char *);
     }
     command[count] = NULL;
-    // this line is to avoid a compile warning before your implementation is complete
-    // and may be removed
-    command[count] = command[count];
 
 /*
  * TODO:
@@ -58,7 +64,21 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
-
+    int pid = fork()
+    switch(pid{
+        case -1:
+            printf("Error encountered")
+            return false
+        case 0:
+            printf("Print from child process...")
+            execv(command[0], &command[1]);
+            break;
+        default:
+            printf("Child ID: ")
+            print("%d\n", pid)
+            wait()
+            break;
+    })
     va_end(args);
 
     return true;
@@ -80,10 +100,6 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
         command[i] = va_arg(args, char *);
     }
     command[count] = NULL;
-    // this line is to avoid a compile warning before your implementation is complete
-    // and may be removed
-    command[count] = command[count];
-
 
 /*
  * TODO
@@ -92,7 +108,34 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+    int pid;
+    int fd = open("outputfile.txt", O_WRONLY|O_TRUNC|O_CREAT, 0644);
+    if (fd < 0) {
+         perror("open");
+         return false; 
+    }
+    switch (pid = fork()) {
+    case -1:
+        perror("fork");
+        return false;
+    case 0:
+        if (dup2(fd, 1) < 0) { 
+            perror("dup2"); 
+            return false;
+        }
+        printf("Print from child process...")
+        execv(command[0], command);
+        close(fd);
+        break;
 
+    default:
+        printf("Child ID: ")
+        printf("%d\n", pid)
+        wait()
+        close(fd);
+        break;
+        /* do whatever the parent wants to do. */
+    }
     va_end(args);
 
     return true;
