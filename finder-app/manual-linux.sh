@@ -36,8 +36,9 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
 
     # TODO: Add your kernel build steps here
     echo "STARTING MY KERNEL BUILD\n"
-    make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu-mrproper
-    make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu-mrproper
+    pwd
+    make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- mrproper
+    make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- defconfig
     echo "END OF MY KERNEL BUILD\n"
 fi
 
