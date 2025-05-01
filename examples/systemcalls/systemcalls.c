@@ -116,7 +116,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *
 */
     int pid;
-    int fd = open("outputfile.txt", O_WRONLY|O_TRUNC|O_CREAT, 0644);
+    int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
     if (fd < 0) {
          perror("open");
          return false; 
