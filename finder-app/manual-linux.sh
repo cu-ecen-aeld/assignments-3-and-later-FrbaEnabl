@@ -35,6 +35,9 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     git checkout ${KERNEL_VERSION}
 
     # TODO: Add your kernel build steps here
+    echo "STARTING MY KERNEL BUILD\n"
+    make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- mrproper
+    echo "END OF MY KERNEL BUILD\n"
 fi
 
 echo "Adding the Image in outdir"
