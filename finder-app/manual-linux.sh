@@ -67,14 +67,12 @@ ls
 echo "before"
 ls bin
 ls usr/bin
-curl -O https://www.busybox.net/downloads/busybox-1.36.1.tar.bz2
-tar -xvjf busybox-1.36.1.tar.bz2
-cd "busybox-1.36.1"
-make distclean
-make defconfig
-make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
-make CONFIG_PREFIX=${OUTDIR} ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
-echo "DONE SO FAR"
+# if [ ! -d "${OUTDIR}/busybox-1.36.1.tar.bz2" ]; then
+#     curl -O https://www.busybox.net/downloads/busybox-1.36.1.tar.bz2
+#     tar -xvjf busybox-1.36.1.tar.bz2
+# fi
+# cd "busybox-1.36.1"
+
 
 cd "$OUTDIR"
 if [ ! -d "${OUTDIR}/busybox" ]
@@ -83,6 +81,11 @@ git clone git://busybox.net/busybox.git
     cd busybox
     git checkout ${BUSYBOX_VERSION}
     # TODO:  Configure busybox
+    make distclean
+    make defconfig
+    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
+    make CONFIG_PREFIX=${OUTDIR} ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
+    echo "DONE SO FAR"
 else
     cd busybox
 fi
