@@ -67,7 +67,7 @@ ls
 echo "before"
 ls bin
 ls usr/bin
-echo "after
+echo "after"
 make distclean
 make defconfig
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
