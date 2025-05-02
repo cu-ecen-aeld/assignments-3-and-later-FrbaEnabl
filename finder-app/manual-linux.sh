@@ -74,7 +74,7 @@ make distclean
 make defconfig
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
 make CONFIG_PREFIX=/path/to/rootdir ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
-
+echo "DONE SO FAR"
 cd "$OUTDIR"
 if [ ! -d "${OUTDIR}/busybox" ]
 then
