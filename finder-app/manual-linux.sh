@@ -36,11 +36,15 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     git checkout ${KERNEL_VERSION}
 
     # TODO: Add your kernel build steps here
-    echo "STARTING MY KERNEL BUILD\n"
+    echo "STARTING MY KERNEL BUILD"
     pwd
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE mrproper
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
-    echo "END OF MY KERNEL BUILD\n"
+    make -j4 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE all
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE modules
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE dtbs
+
+    echo "END OF MY KERNEL BUILD"
 fi
 
 echo "Adding the Image in outdir"
