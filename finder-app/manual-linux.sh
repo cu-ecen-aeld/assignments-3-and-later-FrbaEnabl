@@ -38,6 +38,7 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     # TODO: Add your kernel build steps here
     echo "STARTING MY KERNEL BUILD"
     pwd
+    sudo apt-get install libssl-dev
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE mrproper
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
     make -j4 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE all
@@ -58,6 +59,16 @@ then
 fi
 
 # TODO: Create necessary base directories
+mkdir -p bin etc home lib lib64 proc sbin sys tmp usr var
+mkdir -p usr/bin usr/lib usr/sbin
+mkdir -p var/log
+pwd
+ls
+ls bin
+make distclean
+make defconfig
+make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
+make CONFIG_PREFIX=/path/to/rootdir ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
 
 cd "$OUTDIR"
 if [ ! -d "${OUTDIR}/busybox" ]
