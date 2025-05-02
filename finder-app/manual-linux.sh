@@ -64,7 +64,10 @@ mkdir -p usr/bin usr/lib usr/sbin
 mkdir -p var/log
 pwd
 ls
+echo "before"
 ls bin
+ls usr/bin
+echo "after
 make distclean
 make defconfig
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
