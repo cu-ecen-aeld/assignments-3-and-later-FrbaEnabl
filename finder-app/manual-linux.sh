@@ -41,7 +41,7 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     sudo apt-get install libssl-dev
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE mrproper
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
-    make -j4 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE all
+    make -j6 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE all
     # make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE modules
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE dtbs
 
@@ -67,12 +67,10 @@ ls
 echo "before"
 ls bin
 ls usr/bin
-echo "THIS!"
-ls /tmp/aeld/busybox
-echo "after"
 curl -O https://www.busybox.net/downloads/busybox-1.37.0.tar.bz2
 tar -xvjf busybox-1.37.0.tar.bz2
 ls
+ls busybox
 # make distclean
 # make defconfig
 # make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
