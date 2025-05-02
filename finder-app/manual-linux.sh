@@ -62,16 +62,6 @@ fi
 mkdir -p bin etc home lib lib64 proc sbin sys tmp usr var
 mkdir -p usr/bin usr/lib usr/sbin
 mkdir -p var/log
-pwd
-ls
-echo "before"
-ls bin
-ls usr/bin
-# if [ ! -d "${OUTDIR}/busybox-1.36.1.tar.bz2" ]; then
-#     curl -O https://www.busybox.net/downloads/busybox-1.36.1.tar.bz2
-#     tar -xvjf busybox-1.36.1.tar.bz2
-# fi
-# cd "busybox-1.36.1"
 
 
 cd "$OUTDIR"
@@ -81,18 +71,18 @@ git clone git://busybox.net/busybox.git
     cd busybox
     git checkout ${BUSYBOX_VERSION}
     # TODO:  Configure busybox
-    make distclean
-    make defconfig
-    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
-    make CONFIG_PREFIX=${OUTDIR} ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
-    echo "DONE SO FAR"
 else
     cd busybox
 fi
 
 # TODO: Make and install busybox
-
+make distclean
+make defconfig
+make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
+make CONFIG_PREFIX=${OUTDIR} ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
+echo "DONE SO FAR"
 echo "Library dependencies"
+pwd
 ${CROSS_COMPILE}readelf -a bin/busybox | grep "program interpreter"
 ${CROSS_COMPILE}readelf -a bin/busybox | grep "Shared library"
 
