@@ -42,7 +42,7 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE mrproper
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
     make -j4 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE all
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE modules
+    # make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE modules
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE dtbs
 
     echo "END OF MY KERNEL BUILD"
@@ -68,6 +68,9 @@ echo "before"
 ls bin
 ls usr/bin
 echo "after"
+curl -O https://www.busybox.net/downloads/busybox-1.37.0.tar.bz2
+tar -xvjf busybox-1.37.0.tar.bz2
+bzip2 -d busybox-1.37.0.bz2
 make distclean
 make defconfig
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
