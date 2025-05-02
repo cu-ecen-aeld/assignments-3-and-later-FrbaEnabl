@@ -73,8 +73,9 @@ cd "busybox-1.36.1"
 make distclean
 make defconfig
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
-make CONFIG_PREFIX=/path/to/rootdir ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
+make CONFIG_PREFIX=${outdir}/bin/ ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
 echo "DONE SO FAR"
+
 cd "$OUTDIR"
 if [ ! -d "${OUTDIR}/busybox" ]
 then
