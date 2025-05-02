@@ -70,7 +70,7 @@ ls usr/bin
 echo "after"
 curl -O https://www.busybox.net/downloads/busybox-1.37.0.tar.bz2
 tar -xvjf busybox-1.37.0.tar.bz2
-bzip2 -d busybox-1.37.0.bz2
+ls
 make distclean
 make defconfig
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
