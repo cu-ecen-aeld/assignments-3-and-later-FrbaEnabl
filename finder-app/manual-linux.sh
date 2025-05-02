@@ -69,12 +69,11 @@ ls bin
 ls usr/bin
 curl -O https://www.busybox.net/downloads/busybox-1.37.0.tar.bz2
 tar -xvjf busybox-1.37.0.tar.bz2
-ls
-ls busybox
-# make distclean
-# make defconfig
-# make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
-# make CONFIG_PREFIX=/path/to/rootdir ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
+pushd "busybox-1.37.0"
+make distclean
+make defconfig
+make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
+make CONFIG_PREFIX=/path/to/rootdir ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
 
 cd "$OUTDIR"
 if [ ! -d "${OUTDIR}/busybox" ]
