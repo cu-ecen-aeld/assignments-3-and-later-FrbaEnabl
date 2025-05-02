@@ -67,14 +67,16 @@ ls
 echo "before"
 ls bin
 ls usr/bin
+echo "THIS!"
+ls /tmp/aeld/busybox
 echo "after"
 curl -O https://www.busybox.net/downloads/busybox-1.37.0.tar.bz2
 tar -xvjf busybox-1.37.0.tar.bz2
 ls
-make distclean
-make defconfig
-make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
-make CONFIG_PREFIX=/path/to/rootdir ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
+# make distclean
+# make defconfig
+# make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
+# make CONFIG_PREFIX=/path/to/rootdir ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
 
 cd "$OUTDIR"
 if [ ! -d "${OUTDIR}/busybox" ]
