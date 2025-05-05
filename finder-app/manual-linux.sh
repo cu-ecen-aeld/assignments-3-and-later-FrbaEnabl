@@ -59,6 +59,7 @@ then
 fi
 
 # TODO: Create necessary base directories
+cd "$OUTDIR/rootfs"
 mkdir -p bin etc home lib lib64 proc sbin sys tmp usr var dev
 mkdir -p usr/bin usr/lib usr/sbin
 mkdir -p var/log
@@ -79,25 +80,25 @@ fi
 
 # TODO: Make and install busybox
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
-make CONFIG_PREFIX=${OUTDIR} ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
+make CONFIG_PREFIX=${OUTDIR}/rootfs ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
 echo "Library dependencies"
-${CROSS_COMPILE}readelf -a ${OUTDIR}/bin/busybox | grep "program interpreter"
-${CROSS_COMPILE}readelf -a ${OUTDIR}/bin/busybox | grep "Shared library"
+${CROSS_COMPILE}readelf -a ${OUTDIR}/rootfs/bin/busybox | grep "program interpreter"
+${CROSS_COMPILE}readelf -a ${OUTDIR}/rootfs/bin/busybox | grep "Shared library"
 
 # TODO: Add library dependencies to rootfs
-cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libm.so.6 /tmp/aeld/lib64/libm.so.6
-cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libresolv.so.2 /tmp/aeld/lib64/libresolv.so.2
-cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libc.so.6 /tmp/aeld/lib64/libc.so.6
-cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib/ld-linux-aarch64.so.1 /tmp/aeld/lib/ld-linux-aarch64.so.1
+cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libm.so.6 /tmp/aeld/rootfs/lib64/libm.so.6
+cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libresolv.so.2 /tmp/aeld/rootfs/lib64/libresolv.so.2
+cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libc.so.6 /tmp/aeld/rootfs/lib64/libc.so.6
+cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib/ld-linux-aarch64.so.1 /tmp/aeld/rootfs/lib/ld-linux-aarch64.so.1
 
 # TODO: Make device nodes
-if [ ! -e "${OUTDIR}/dev/null" ]
+if [ ! -e "${OUTDIR}/rootfs//dev/null" ]
 then
-    sudo mknod -m 666 ${OUTDIR}/dev/null c 1 3
+    sudo mknod -m 666 ${OUTDIR}/rootfs/dev/null c 1 3
 fi
-if [ ! -e "${OUTDIR}/dev/console" ]
+if [ ! -e "${OUTDIR}/rootfs/dev/console" ]
 then
-    sudo mknod -m 666 ${OUTDIR}/dev/console c 5 1
+    sudo mknod -m 666 ${OUTDIR}/rootfs/dev/console c 5 1
 fi
 # TODO: Clean and build the writer utility
 cd /home/frba/assignments-3-and-later-FrbaEnabl/finder-app
@@ -111,6 +112,6 @@ sudo chown -R frba:frba ${OUTDIR}
 
 # TODO: Create initramfs.cpio.gz
 mkdir "$OUTDIR/rootfs"
-cd "$OUTDIR"
+cd "$OUTDIR/rootfs"
 find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/rootfs/initramfs.cpio
 gzip -f initramfs.cpio
