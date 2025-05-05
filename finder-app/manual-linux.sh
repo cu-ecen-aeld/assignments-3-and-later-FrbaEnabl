@@ -47,12 +47,12 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE dtbs
 
     # Copy the vmlinux file to Image in OUTDIR
-    cp $OUTDIR/linux-stable/vmlinux $OUTDIR/Image
 
     echo "END OF MY KERNEL BUILD"
 fi
 
 echo "Adding the Image in outdir"
+cp $OUTDIR/linux-stable/vmlinux $OUTDIR/Image
 
 echo "Creating the staging directory for the root filesystem"
 cd "$OUTDIR"
@@ -118,5 +118,5 @@ sudo chown -R frba:frba ${OUTDIR}
 # TODO: Create initramfs.cpio.gz
 cd "$OUTDIR/rootfs"
 find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio
-gzip -f initramfs.cpio
+gzip -f ${OUTDIR}/initramfs.cpio
 cp initramfs.cpio.gz ../initramfs.cpio.gz
