@@ -40,14 +40,14 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     pwd
     sudo apt-get install libssl-dev
     # Build commands with output directed to OUTDIR
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE O=$OUTDIR mrproper
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE O=$OUTDIR defconfig
-    make -j6 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE O=$OUTDIR all
-    # make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE O=$OUTDIR modules
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE O=$OUTDIR dtbs
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE mrproper
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
+    make -j6 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE all
+    # make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE modules
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE dtbs
 
     # Copy the vmlinux file to Image in OUTDIR
-    cp $OUTDIR/vmlinux $OUTDIR/Image
+    cp $OUTDIR/linux-stable/vmlinux $OUTDIR/Image
 
     echo "END OF MY KERNEL BUILD"
 fi
