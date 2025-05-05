@@ -105,7 +105,7 @@ make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
-cp /home/frba/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/home/finder-app
+cp -r /home/frba/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/home/finder-app
 # TODO: Chown the root directory
 sudo chown -R frba:frba ${OUTDOR}
 
