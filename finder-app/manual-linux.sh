@@ -118,5 +118,4 @@ sudo chown -R frba:frba ${OUTDIR}
 cd "$OUTDIR/rootfs"
 pwd
 find $OUTDIR/rootfs | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio
-ls
 # gzip -f ${OUTDIR}/initramfs.cpio
