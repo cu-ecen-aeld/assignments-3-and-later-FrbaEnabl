@@ -110,6 +110,7 @@ cp -r /home/frba/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/home/fin
 sudo chown -R frba:frba ${OUTDIR}
 
 # TODO: Create initramfs.cpio.gz
-cd "$OUTDIR/rootfs"
-find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio
+mkdir "$OUTDIR/rootfs"
+cd "$OUTDIR"
+find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/rootfs/initramfs.cpio
 gzip -f initramfs.cpio
