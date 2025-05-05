@@ -43,7 +43,6 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE mrproper
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
     make -j6 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE all
-    # make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE modules
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE dtbs
 
     # Copy the vmlinux file to Image in OUTDIR
@@ -97,7 +96,7 @@ cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-
 cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib/ld-linux-aarch64.so.1 /tmp/aeld/rootfs/lib/ld-linux-aarch64.so.1
 
 # TODO: Make device nodes
-if [ ! -e "${OUTDIR}/rootfs//dev/null" ]
+if [ ! -e "${OUTDIR}/rootfs/dev/null" ]
 then
     sudo mknod -m 666 ${OUTDIR}/rootfs/dev/null c 1 3
 fi
@@ -117,5 +116,5 @@ sudo chown -R frba:frba ${OUTDIR}
 
 # TODO: Create initramfs.cpio.gz
 cd "$OUTDIR/rootfs"
-find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio
-gzip -f ${OUTDIR}/initramfs.cpio
+# find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio
+# gzip -f ${OUTDIR}/initramfs.cpio
