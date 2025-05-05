@@ -92,15 +92,21 @@ cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-
 cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libc.so.6 /tmp/aeld/lib64/libc.so.6
 cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib/ld-linux-aarch64.so.1 /tmp/aeld/lib/ld-linux-aarch64.so.1
 
-
-
 # TODO: Make device nodes
+sudo mknod -m 666 ${OUTDIR}/dev/null c 1 3
+sudo mknod -m 666 ${OUTDIR}/dev/console c 5 1
 
 # TODO: Clean and build the writer utility
-
+cd /home/user/assignments-3-and-later-FrbaEnabl/finder-app
+make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
+make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
-
+cp /home/user/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/home/finder-app
 # TODO: Chown the root directory
+sudo chown -R frba:frba ${OUTDOR}
 
 # TODO: Create initramfs.cpio.gz
+cd "$OUTDIR/rootfs"
+find . | cpio -H newc -ov --owner root:root > ${OUTDOR}/initramfs.cpio
+gzip -f initramfs.cpio
