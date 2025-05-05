@@ -91,9 +91,14 @@ cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-
 cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib/ld-linux-aarch64.so.1 /tmp/aeld/lib/ld-linux-aarch64.so.1
 
 # TODO: Make device nodes
-sudo mknod -m 666 ${OUTDIR}/dev/null c 1 3
-sudo mknod -m 666 ${OUTDIR}/dev/console c 5 1
-
+if [ ! -d "${OUTDIR}/dev/null" ]
+then
+    sudo mknod -m 666 ${OUTDIR}/dev/null c 1 3
+fi
+if [ ! -d "${OUTDIR}/dev/console" ]
+then
+    sudo mknod -m 666 ${OUTDIR}/dev/console c 5 1
+fi
 # TODO: Clean and build the writer utility
 cd /home/user/assignments-3-and-later-FrbaEnabl/finder-app
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
