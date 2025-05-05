@@ -107,9 +107,9 @@ make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 # on the target rootfs
 cp -r /home/frba/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/home/finder-app
 # TODO: Chown the root directory
-sudo chown -R frba:frba ${OUTDOR}
+sudo chown -R frba:frba ${OUTDIR}
 
 # TODO: Create initramfs.cpio.gz
 cd "$OUTDIR/rootfs"
-find . | cpio -H newc -ov --owner root:root > ${OUTDOR}/initramfs.cpio
+find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio
 gzip -f initramfs.cpio
