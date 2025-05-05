@@ -59,6 +59,7 @@ then
 fi
 
 # TODO: Create necessary base directories
+mkdir "$OUTDIR/rootfs"
 cd "$OUTDIR/rootfs"
 mkdir -p bin etc home lib lib64 proc sbin sys tmp usr var dev
 mkdir -p usr/bin usr/lib usr/sbin
@@ -106,7 +107,7 @@ make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
-cp -r /home/frba/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/home/finder-app
+cp -r /home/frba/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/rootfs/home/finder-app
 # TODO: Chown the root directory
 sudo chown -R frba:frba ${OUTDIR}
 
