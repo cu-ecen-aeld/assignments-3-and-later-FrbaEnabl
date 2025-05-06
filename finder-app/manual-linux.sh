@@ -106,17 +106,17 @@ then
 fi
 # TODO: Clean and build the writer utility
 pwd
-echo "ECHOING WORKSPACE: $GITHUB_WORKSPACE"
-ls "/__w"
-ls "/__w/assignments-3-and-later-FrbaEnabl/assignments-3-and-later-FrbaEnabl"
+# echo "ECHOING WORKSPACE: $GITHUB_WORKSPACE"
+# ls "/__w"
+# ls "/__w/assignments-3-and-later-FrbaEnabl/assignments-3-and-later-FrbaEnabl"
 
-cd $GITHUB_WORKSPACE/finder-app
+cd $OUTDIR/assignments-3-and-later-FrbaEnabl/finder-app
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
 pwd
-cp -r $GITHUB_WORKSPACE/finder-app ${OUTDIR}/rootfs/home
+cp -r $OUTDIR/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/rootfs/home
 # TODO: Chown the root directory
 sudo chown -R root:root ${OUTDIR}
 
