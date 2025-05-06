@@ -117,7 +117,7 @@ make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 pwd
 cp -r /home/frba/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/rootfs/home
 # TODO: Chown the root directory
-sudo chown -R root:root ${OUTDIR}
+sudo chown -R root:root ${OUTDIR}/rootfs/*
 
 # TODO: Create initramfs.cpio.gz
 cd "$OUTDIR/rootfs"
