@@ -106,13 +106,13 @@ then
 fi
 # TODO: Clean and build the writer utility
 pwd
-cd $HOME/assignments-3-and-later-FrbaEnabl/finder-app
+cd $GITHUB_WORKSPACE/assignments-3-and-later-FrbaEnabl/finder-app
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
 pwd
-cp -r $HOME/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/rootfs/home
+cp -r $GITHUB_WORKSPACE/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/rootfs/home
 # TODO: Chown the root directory
 sudo chown -R frba:frba ${OUTDIR}
 
