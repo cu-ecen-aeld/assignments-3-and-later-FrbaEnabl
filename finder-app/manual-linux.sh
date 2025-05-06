@@ -7,11 +7,10 @@ set -u
 
 OUTDIR=/tmp/aeld
 KERNEL_REPO=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
-KERNEL_VERSION=v5.15.163
+KERNEL_VERSION=v5.1.10
 BUSYBOX_VERSION=1_33_1
 FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
-export PATH="/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin:$PATH"
 CROSS_COMPILE=aarch64-none-linux-gnu-
 
 if [ $# -lt 1 ]
@@ -21,7 +20,7 @@ else
 	OUTDIR=$1
 	echo "Using passed directory ${OUTDIR} for output"
 fi
-
+# If OUTDIR already exists next command won't do any thing
 mkdir -p ${OUTDIR}
 
 cd "$OUTDIR"
@@ -33,24 +32,25 @@ fi
 if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     cd linux-stable
     echo "Checking out version ${KERNEL_VERSION}"
+    # I will use a download version tarball so this command is not needed
     git checkout ${KERNEL_VERSION}
 
     # TODO: Add your kernel build steps here
-    echo "STARTING MY KERNEL BUILD"
-    pwd
-    # Build commands with output directed to OUTDIR
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE mrproper
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
-    make -j6 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE all
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE dtbs
-
-    # Copy the vmlinux file to Image in OUTDIR
-
-    echo "END OF MY KERNEL BUILD"
+    # [1] Deep clean a pre-exist build artifacts
+    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} mrproper
+    # Default defconfig Configure for our “virt” arm dev board
+    make ARCH=${ARCH}  CROSS_COMPILE=${CROSS_COMPILE} defconfig
+    # vmlinux
+    make -j8 ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} all
+    # Skipping modules for this simple assignment
+    # make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} modules
+    # Build the devicetree
+    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} dtbs
 fi
 
 echo "Adding the Image in outdir"
-cp $OUTDIR/linux-stable/arch/${ARCH}/boot/Image $OUTDIR
+# For assignment test requirment copying Image file to OUTDIR
+cp ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ${OUTDIR}
 
 echo "Creating the staging directory for the root filesystem"
 cd "$OUTDIR"
@@ -61,12 +61,10 @@ then
 fi
 
 # TODO: Create necessary base directories
-mkdir "$OUTDIR/rootfs"
-cd "$OUTDIR/rootfs"
-mkdir -p bin etc home lib lib64 proc sbin sys tmp usr var dev
+mkdir -p "${OUTDIR}/rootfs/" && cd "${OUTDIR}/rootfs/"
+mkdir -p bin dev etc home lib lib64 proc sbin sys tmp var
 mkdir -p usr/bin usr/lib usr/sbin
 mkdir -p var/log
-
 
 cd "$OUTDIR"
 if [ ! -d "${OUTDIR}/busybox" ]
@@ -77,52 +75,57 @@ git clone git://busybox.net/busybox.git
     # TODO:  Configure busybox
     make distclean
     make defconfig
+
 else
     cd busybox
 fi
 
 # TODO: Make and install busybox
+
 make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
 make CONFIG_PREFIX=${OUTDIR}/rootfs ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
-echo "Library dependencies"
-${CROSS_COMPILE}readelf -a ${OUTDIR}/rootfs/bin/busybox | grep "program interpreter"
-${CROSS_COMPILE}readelf -a ${OUTDIR}/rootfs/bin/busybox | grep "Shared library"
 
+echo "Library dependencies"
+#${CROSS_COMPILE}readelf -a /bin/busybox | grep "program interpreter"
+#${CROSS_COMPILE}readelf -a /bin/busybox | grep "Shared library"
 # TODO: Add library dependencies to rootfs
-cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libm.so.6 ${OUTDIR}/rootfs/lib64/libm.so.6
-cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libresolv.so.2 ${OUTDIR}/rootfs/lib64/libresolv.so.2
-cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libc.so.6 ${OUTDIR}/rootfs/lib64/libc.so.6
-cp /usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib/ld-linux-aarch64.so.1
+
+cd "${OUTDIR}/rootfs/"
+SYSROOT=$(${CROSS_COMPILE}gcc -print-sysroot )
+cp ${SYSROOT}/lib/ld-linux-aarch64.so.1 lib
+cp ${SYSROOT}/lib64/libm.so.6 lib64
+cp ${SYSROOT}/lib64/libresolv.so.2 lib64
+cp ${SYSROOT}/lib64/libc.so.6 lib64
 
 # TODO: Make device nodes
-if [ ! -e "${OUTDIR}/rootfs/dev/null" ]
-then
-    sudo mknod -m 666 ${OUTDIR}/rootfs/dev/null c 1 3
-fi
-if [ ! -e "${OUTDIR}/rootfs/dev/console" ]
-then
-    sudo mknod -m 666 ${OUTDIR}/rootfs/dev/console c 5 1
-fi
-# TODO: Clean and build the writer utility
-pwd
-# echo "ECHOING WORKSPACE: $GITHUB_WORKSPACE"
-# ls "/__w"
-# ls "/__w/assignments-3-and-later-FrbaEnabl/assignments-3-and-later-FrbaEnabl"
 
-cd /home/frba/assignments-3-and-later-FrbaEnabl/finder-app
-make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
-make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
+sudo mknod -m 666 dev/null c 1 3
+sudo mknod -m 600 dev/console c 5 1
+
+# TODO: Clean and build the writer utility
+
+cd ${FINDER_APP_DIR}
+make clean
+make CROSS_COMPILE=${CROSS_COMPILE}
+
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
-pwd
-cp -r /home/frba/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/rootfs/home
+
+cd ${OUTDIR}/rootfs/home
+mkdir conf
+cp ${FINDER_APP_DIR}/writer .
+cp "${FINDER_APP_DIR}/finder.sh" .
+cp ${FINDER_APP_DIR}/finder-test.sh .
+cp ${FINDER_APP_DIR}/conf/username.txt ./conf
+cp ${FINDER_APP_DIR}/autorun-qemu.sh .
+
 # TODO: Chown the root directory
-sudo chown -R root:root ${OUTDIR}/rootfs/*
+
+cd ${OUTDIR}/rootfs
+sudo chown -R root:root *
 
 # TODO: Create initramfs.cpio.gz
-cd "$OUTDIR/rootfs"
-pwd
-find . | cpio -H newc -ov --owner root:root > initramfs.cpio
-pwd
 
-gzip -f initramfs.cpio
+find . | cpio -H newc -ov --owner root:root > ../initramfs.cpio
+cd ..
+gzip initramfs.cpio
