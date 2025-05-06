@@ -105,12 +105,14 @@ then
     sudo mknod -m 666 ${OUTDIR}/rootfs/dev/console c 5 1
 fi
 # TODO: Clean and build the writer utility
-cd /home/frba/assignments-3-and-later-FrbaEnabl/finder-app
+pwd
+cd $HOME/assignments-3-and-later-FrbaEnabl/finder-app
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
-cp -r /home/frba/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/rootfs/home/finder-app
+pwd
+cp -r $HOME/assignments-3-and-later-FrbaEnabl/finder-app ${OUTDIR}/rootfs/home
 # TODO: Chown the root directory
 sudo chown -R frba:frba ${OUTDIR}
 
@@ -118,4 +120,4 @@ sudo chown -R frba:frba ${OUTDIR}
 cd "$OUTDIR/rootfs"
 pwd
 find $OUTDIR/rootfs | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio
-# gzip -f ${OUTDIR}/initramfs.cpio
+gzip -f ${OUTDIR}/initramfs.cpio
