@@ -106,7 +106,9 @@ then
 fi
 # TODO: Clean and build the writer utility
 pwd
-cd $GITHUB_WORKSPACE/assignments-3-and-later-FrbaEnabl/finder-app
+echo "ECHOING WORKSPACE: $GITHUB_WORKSPACE"
+ls "/_w/"
+cd $GITHUB_WORKSPACE/finder-app
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 # TODO: Copy the finder related scripts and executables to the /home directory
