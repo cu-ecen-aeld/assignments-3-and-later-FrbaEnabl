@@ -38,7 +38,6 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     # TODO: Add your kernel build steps here
     echo "STARTING MY KERNEL BUILD"
     pwd
-    sudo apt-get install libssl-dev
     # Build commands with output directed to OUTDIR
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE mrproper
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
@@ -51,7 +50,7 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
 fi
 
 echo "Adding the Image in outdir"
-cp $OUTDIR/linux-stable/vmlinux $OUTDIR/Image
+cp $OUTDIR/linux-stable/arch/${ARCH}/boot/Image $OUTDIR
 
 echo "Creating the staging directory for the root filesystem"
 cd "$OUTDIR"
