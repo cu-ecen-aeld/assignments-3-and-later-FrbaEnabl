@@ -105,7 +105,9 @@ sudo mknod -m 600 dev/console c 5 1
 # TODO: Clean and build the writer utility
 
 cd $(realpath $(dirname $0))
-make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
+pwd
+ls
+make clean
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 
 # TODO: Copy the finder related scripts and executables to the /home directory
