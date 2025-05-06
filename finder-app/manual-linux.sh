@@ -104,7 +104,7 @@ sudo mknod -m 600 dev/console c 5 1
 
 # TODO: Clean and build the writer utility
 
-cd /home/frba/assignments-3-and-later-FrbaEnabl/finder-app
+cd $(realpath $(dirname $0))
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 
