@@ -108,7 +108,7 @@ fi
 pwd
 echo "ECHOING WORKSPACE: $GITHUB_WORKSPACE"
 ls "/__w"
-ls "/__w/assignments-3-and-later-FrbaEnabl"
+ls "/__w/assignments-3-and-later-FrbaEnabl/assignments-3-and-later-FrbaEnabl"
 
 cd $GITHUB_WORKSPACE/finder-app
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
@@ -118,7 +118,7 @@ make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 pwd
 cp -r $GITHUB_WORKSPACE/finder-app ${OUTDIR}/rootfs/home
 # TODO: Chown the root directory
-sudo chown -R frba:frba ${OUTDIR}
+sudo chown -R root:root ${OUTDIR}
 
 # TODO: Create initramfs.cpio.gz
 cd "$OUTDIR/rootfs"
