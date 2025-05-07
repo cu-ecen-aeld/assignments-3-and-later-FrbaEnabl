@@ -9,7 +9,7 @@ OUTDIR=/tmp/aeld
 KERNEL_REPO=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
 KERNEL_VERSION=v5.15.163
 BUSYBOX_VERSION=1_33_1
-FINDER_APP_DIR=$(realpath $(dirname $0))
+FINDER_APP=$(realpath $(dirname $0))
 ARCH=arm64
 export PATH="/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin:$PATH"
 CROSS_COMPILE=aarch64-none-linux-gnu-
@@ -103,11 +103,9 @@ sudo mknod -m 666 dev/null c 1 3
 sudo mknod -m 600 dev/console c 5 1
 
 # TODO: Clean and build the writer utility
-
-cd $(realpath $(dirname $0))
+cd $FINDER_APP
 pwd
 ls
-echo "REALPATH: $(realpath $(dirname $0))"
 make clean
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 
@@ -116,20 +114,11 @@ make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 
 cd ${OUTDIR}/rootfs/home
 mkdir conf
-cp ${FINDER_APP_DIR}/writer .
-cp "${FINDER_APP_DIR}/finder.sh" .
-cp ${FINDER_APP_DIR}/finder-test.sh .
-cp ${FINDER_APP_DIR}/conf/username.txt ./conf
-cp ${FINDER_APP_DIR}/autorun-qemu.sh .
-
-
-cd ${OUTDIR}/rootfs/home
-mkdir conf
-cp ${FINDER_APP_DIR}/writer .
-cp "${FINDER_APP_DIR}/finder.sh" .
-cp ${FINDER_APP_DIR}/finder-test.sh .
-cp ${FINDER_APP_DIR}/conf/username.txt ./conf
-cp ${FINDER_APP_DIR}/autorun-qemu.sh .
+cp ${FINDER_APP}/writer .
+cp "${FINDER_APP}/finder.sh" .
+cp ${FINDER_APP}/finder-test.sh .
+cp ${FINDER_APP}/../conf/username.txt ./conf
+cp ${FINDER_APP}/autorun-qemu.sh .
 
 # TODO: Chown the root directory
 
