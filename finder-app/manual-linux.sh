@@ -120,7 +120,7 @@ cp ${FINDER_APP}/finder-test.sh .
 cp ${FINDER_APP}/../conf/username.txt ./conf
 cp ${FINDER_APP}/../conf/assignment.txt ./conf
 cp ${FINDER_APP}/autorun-qemu.sh .
-
+sudo chmod +x finder.sh
 # TODO: Chown the root directory
 
 cd ${OUTDIR}/rootfs
