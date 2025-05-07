@@ -107,6 +107,7 @@ sudo mknod -m 600 dev/console c 5 1
 cd $(realpath $(dirname $0))
 pwd
 ls
+echo "REALPATH: $(realpath $(dirname $0))"
 make clean
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 
