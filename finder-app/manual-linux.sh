@@ -118,6 +118,7 @@ cp ${FINDER_APP}/writer .
 cp "${FINDER_APP}/finder.sh" .
 cp ${FINDER_APP}/finder-test.sh .
 cp ${FINDER_APP}/../conf/username.txt ./conf
+cp ${FINDER_APP}/../conf/assignment.txt ./conf
 cp ${FINDER_APP}/autorun-qemu.sh .
 
 # TODO: Chown the root directory
