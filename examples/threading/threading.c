@@ -27,11 +27,11 @@ void* threadfunc(void* thread_param)
         return NULL;
     }
 
-    if (pthread_mutex_init(thread_dat_ptr->mutex, NULL) != 0) {
-        // Error handling for mutex initialization failure
-        fprintf(stderr, "Error initializing mutex\n");
-        return NULL;
-    }
+    // if (pthread_mutex_init(thread_dat_ptr->mutex, NULL) != 0) {
+    //     // Error handling for mutex initialization failure
+    //     fprintf(stderr, "Error initializing mutex\n");
+    //     return NULL;
+    // }
 
     wait_ms(thread_dat_ptr->wait_to_obtain_ms);
     if (pthread_mutex_lock(thread_dat_ptr->mutex) != 0) {
