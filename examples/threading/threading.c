@@ -51,6 +51,8 @@ void* threadfunc(void* thread_param)
     // Destroy the mutex and free memory when done
     // pthread_mutex_destroy(thread_dat_ptr->mutex);
     // free(thread_dat_ptr);
+    thread_dat_ptr->thread_complete_success = true;
+
     return thread_param;
 }
 
