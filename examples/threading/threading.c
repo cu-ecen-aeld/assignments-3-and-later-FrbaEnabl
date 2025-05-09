@@ -62,16 +62,16 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
      * using threadfunc() as entry point.
     */
     struct thread_data* thread_dat_ptr = (struct thread_data*)malloc(sizeof(struct thread_data));
-    thread_dat_ptr->wait_to_obtain_ms = 500;
-    thread_dat_ptr->wait_to_release_ms = 500;
+    thread_dat_ptr->wait_to_obtain_ms = (long)wait_to_obtain_ms;
+    thread_dat_ptr->wait_to_release_ms = (long)wait_to_release_ms;
     thread_dat_ptr->thread_complete_success = 0;
+    thread_dat_ptr->mutex = mutex;
     if (pthread_mutex_init(&(thread_dat_ptr->mutex), NULL) != 0) {
         // Error handling for mutex initialization failure
         fprintf(stderr, "Error initializing mutex\n");
         return false;
     }
-    pthread_t my_thread;
-    int rc = pthread_create(&my_thread, NULL, threadfunc, thread_dat_ptr);
+    int rc = pthread_create(thread, NULL, threadfunc, thread_dat_ptr);
     /*
      *
      * return true if successful.
