@@ -24,24 +24,24 @@ void* threadfunc(void* thread_param)
     struct thread_data* thread_dat_ptr = (struct thread_data *) thread_param;
     if (thread_dat_ptr == NULL) {
         fprintf(stderr, "Error allocating memory for thread_data\n");
-        return 1;
+        return NULL;
     }
 
     if (pthread_mutex_init(thread_dat_ptr->mutex, NULL) != 0) {
         // Error handling for mutex initialization failure
         fprintf(stderr, "Error initializing mutex\n");
-        return 1;
+        return NULL;
     }
 
     wait_ms(thread_dat_ptr->wait_to_obtain_ms);
     if (pthread_mutex_lock(&(thread_dat_ptr->mutex)) != 0) {
         fprintf(stderr, "Error locking mutex\n");
-        return false;
+        return NULL;
     }
     wait_ms(thread_dat_ptr->wait_to_release_ms);
     if (pthread_mutex_unlock(&(thread_dat_ptr->mutex)) != 0) {
         fprintf(stderr, "Error unlocking mutex\n");
-        return false;
+        return NULL;
     }
     
     // TODO: wait, obtain mutex, wait, release mutex as described by thread_data structure
