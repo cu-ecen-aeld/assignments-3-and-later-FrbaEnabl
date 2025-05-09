@@ -66,11 +66,11 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
     thread_dat_ptr->wait_to_release_ms = (long)wait_to_release_ms;
     thread_dat_ptr->thread_complete_success = 0;
     thread_dat_ptr->mutex = mutex;
-    if (pthread_mutex_init(thread_dat_ptr->mutex, NULL) != 0) {
-        // Error handling for mutex initialization failure
-        fprintf(stderr, "Error initializing mutex\n");
-        return false;
-    }
+    // if (pthread_mutex_init(thread_dat_ptr->mutex, NULL) != 0) {
+    //     // Error handling for mutex initialization failure
+    //     fprintf(stderr, "Error initializing mutex\n");
+    //     return false;
+    // }
     int rc = pthread_create(thread, NULL, threadfunc, thread_dat_ptr);
     if (rc != 0) {
         // Print an error message and return false
