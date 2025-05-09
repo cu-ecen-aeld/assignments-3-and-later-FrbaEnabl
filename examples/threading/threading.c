@@ -49,8 +49,8 @@ void* threadfunc(void* thread_param)
     //struct thread_data* thread_func_args = (struct thread_data *) thread_param;
 
     // Destroy the mutex and free memory when done
-    pthread_mutex_destroy(thread_dat_ptr->mutex);
-    free(thread_dat_ptr);
+    // pthread_mutex_destroy(thread_dat_ptr->mutex);
+    // free(thread_dat_ptr);
     return thread_param;
 }
 
