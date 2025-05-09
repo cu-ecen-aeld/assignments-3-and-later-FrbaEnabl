@@ -72,6 +72,11 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
         return false;
     }
     int rc = pthread_create(thread, NULL, threadfunc, thread_dat_ptr);
+    if (rc != 0) {
+        // Print an error message and return false
+        fprintf(stderr, "Error: Unable to create thread, rc=%d\n", rc);
+        return false;
+    }
     /*
      *
      * return true if successful.
