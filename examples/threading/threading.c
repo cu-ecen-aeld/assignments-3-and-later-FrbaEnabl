@@ -71,7 +71,7 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
         return false;
     }
     pthread_t my_thread;
-    int rc = pthread_create(&my_thread, NULL, thread_func, thread_dat_ptr);
+    int rc = pthread_create(&my_thread, NULL, threadfunc, thread_dat_ptr);
     /*
      *
      * return true if successful.
