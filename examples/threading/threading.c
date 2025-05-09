@@ -65,7 +65,7 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
     thread_dat.wait_to_obtain_ms = 500;
     thread_dat.wait_to_release_ms = 500;
     thread_dat.thread_complete_success = 0;
-    if (pthread_mutex_init(thread_dat_ptr->mutex, NULL) != 0) {
+    if (pthread_mutex_init(&(thread_dat_ptr->mutex), NULL) != 0) {
         // Error handling for mutex initialization failure
         fprintf(stderr, "Error initializing mutex\n");
         return false;
