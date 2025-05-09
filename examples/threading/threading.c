@@ -77,10 +77,10 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
      * return true if successful.
      * See implementation details in threading.h file comment block
      */
-    if (rc == 0) {
-        pthread_join(*thread, NULL); // Optionally join the thread if needed.
-        return true;
-    }
-    return false;
+    // if (rc == 0) {
+    //     pthread_join(*thread, NULL); // Optionally join the thread if needed.
+    //     return true;
+    // }
+    return true;
 }
 
