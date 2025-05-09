@@ -27,19 +27,19 @@ void* threadfunc(void* thread_param)
         return NULL;
     }
 
-    if (pthread_mutex_init(&(thread_dat_ptr->mutex), NULL) != 0) {
+    if (pthread_mutex_init(thread_dat_ptr->mutex, NULL) != 0) {
         // Error handling for mutex initialization failure
         fprintf(stderr, "Error initializing mutex\n");
         return NULL;
     }
 
     wait_ms(thread_dat_ptr->wait_to_obtain_ms);
-    if (pthread_mutex_lock(&(thread_dat_ptr->mutex)) != 0) {
+    if (pthread_mutex_lock(thread_dat_ptr->mutex) != 0) {
         fprintf(stderr, "Error locking mutex\n");
         return NULL;
     }
     wait_ms(thread_dat_ptr->wait_to_release_ms);
-    if (pthread_mutex_unlock(&(thread_dat_ptr->mutex)) != 0) {
+    if (pthread_mutex_unlock(thread_dat_ptr->mutex) != 0) {
         fprintf(stderr, "Error unlocking mutex\n");
         return NULL;
     }
@@ -49,7 +49,7 @@ void* threadfunc(void* thread_param)
     //struct thread_data* thread_func_args = (struct thread_data *) thread_param;
 
     // Destroy the mutex and free memory when done
-    pthread_mutex_destroy(&(thread_dat_ptr->mutex));
+    pthread_mutex_destroy(thread_dat_ptr->mutex);
     free(thread_dat_ptr);
     return thread_param;
 }
@@ -66,7 +66,7 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
     thread_dat_ptr->wait_to_release_ms = (long)wait_to_release_ms;
     thread_dat_ptr->thread_complete_success = 0;
     thread_dat_ptr->mutex = mutex;
-    if (pthread_mutex_init(&(thread_dat_ptr->mutex), NULL) != 0) {
+    if (pthread_mutex_init(thread_dat_ptr->mutex, NULL) != 0) {
         // Error handling for mutex initialization failure
         fprintf(stderr, "Error initializing mutex\n");
         return false;
