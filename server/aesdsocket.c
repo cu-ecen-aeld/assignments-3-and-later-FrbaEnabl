@@ -102,6 +102,7 @@ int main() {
         }
 
         char buffer[BUFFER_SIZE];
+        char wrt_buffer[BUFFER_SIZE];
         char *packet = NULL;
         size_t packet_size = 0;
 
@@ -154,9 +155,9 @@ int main() {
 
             //     // Sending the entire file back to the client
             //     rewind(fp);  // Move to the start of the file
-            res = fread(buffer, 1, sizeof(buffer), fp);
-            printf("Sending file content: %.*s", res, buffer); // Debugging print
-            if (send(fd, buffer, res, 0) == -1) {
+            res = fread(wrt_buffer, 1, sizeof(wrt_buffer), fp);
+            printf("Sending file content: %.*s", res, wrt_buffer); // Debugging print
+            if (send(fd, wrt_buffer, res, 0) == -1) {
                 perror("send error");
                 break;
             }
