@@ -170,8 +170,8 @@ int main() {
             // }
 
             size_t remain_len = strlen(start);
-            char *temp = realloc(packet, packet_size + remain_len + 1);
-            if (!temp) {
+            char *temp2 = realloc(packet, packet_size + remain_len + 1);
+            if (!temp2) {
                 fprintf(stderr, "Memory allocation error\n");
                 free(packet);
                 fclose(fp);
@@ -179,7 +179,7 @@ int main() {
                 cleanup(sockfd, -1, NULL);
                 exit(EXIT_FAILURE);
             }
-            packet = temp;
+            packet = temp2;
             strcpy(packet + packet_size, start);
             packet_size += remain_len;
         }
