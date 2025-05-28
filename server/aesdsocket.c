@@ -97,7 +97,7 @@ int main() {
     if (!fp) {
         perror("File open error");
         close(fd);
-        continue;
+        exit(EXIT_FAILURE);
     }
     
     char buffer[BUFFER_SIZE];
