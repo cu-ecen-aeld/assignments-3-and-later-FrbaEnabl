@@ -93,7 +93,7 @@ int main() {
         inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
         syslog(LOG_INFO, "Accepted connection from %s", client_ip);
 
-        FILE *fp = fopen(SOCKET_FILE, "w+");  // Open the file for reading and writing
+        FILE *fp = fopen(SOCKET_FILE, "a");
         if (!fp) {
             perror("File open error");
             close(fd);
@@ -104,7 +104,6 @@ int main() {
         char *packet = NULL;
         size_t packet_size = 0;
 
-        // Receive all messages and write them to the file
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
             buffer[res] = '\0';
             char *newline = NULL;
@@ -126,6 +125,14 @@ int main() {
                 packet_size += len;
                 packet[packet_size] = '\0';
                 fprintf(fp, "%s", packet);
+                fflush(fp);  // Ensure file is updated
+
+                // Sending the latest complete packet back to the client
+                if (send(fd, packet, packet_size, 0) == -1) {
+                    perror("send error");
+                    break;
+                }
+
                 packet_size = 0;
                 start = newline + 1;
             }
@@ -147,15 +154,6 @@ int main() {
 
         if (res == -1) {
             perror("recv error");
-        } else {
-            // After receiving all messages, send the file contents back to the client
-            rewind(fp);
-            while ((res = fread(buffer, 1, BUFFER_SIZE, fp)) > 0) {
-                if (send(fd, buffer, res, 0) == -1) {
-                    perror("send error");
-                    break;
-                }
-            }
         }
 
         syslog(LOG_INFO, "Closed connection from %s", client_ip);
