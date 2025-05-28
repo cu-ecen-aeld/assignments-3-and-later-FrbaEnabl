@@ -114,7 +114,7 @@ int main() {
             // char *start = buffer;
             
             // Debugging print to show received data
-            printf("Received buffer: %s", buffer);
+            printf("Received buffer: %s\n", buffer);
 
             int f_res = fprintf(fp, "%s", buffer);
             printf("Bytes written: %d\n", f_res);
