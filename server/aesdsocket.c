@@ -127,6 +127,9 @@ int main() {
                 fprintf(fp, "%s", packet);
                 fflush(fp);  // Ensure file is updated
 
+                // Print the packet to the console
+                printf("Packet received: %s", packet);
+
                 // Sending the latest complete packet back to the client
                 if (send(fd, packet, packet_size, 0) == -1) {
                     perror("send error");
