@@ -113,7 +113,7 @@ int main() {
             // char *start = buffer;
             
             // Debugging print to show received data
-            printf("Received buffer: %s\n", buffer);
+            printf("Received buffer: %s", buffer);
             
             // while ((newline = strchr(start, '\n')) != NULL) {
                 //     printf("BLAM");
@@ -131,7 +131,8 @@ int main() {
                     //     strncpy(packet + packet_size, start, len);
                     //     packet_size += len;
                     //     packet[packet_size] = '\0';
-            fprintf(fp, "%s", buffer);
+            int f_res = fprintf(fp, "%s", buffer);
+            print("Bytes written: %d", f_res)
         }
             fclose(fp);
             // fflush(fp);  // Ensure file is updated
