@@ -107,12 +107,7 @@ int main() {
         size_t packet_size = 0;
 
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
-            FILE *fp = fopen(SOCKET_FILE, "a");
-            if (!fp) {
-                perror("File open error");
-                close(fd);
-                continue;
-            }
+
             printf("BLIB\n");
             buffer[res] = '\0';
             // char *newline = NULL;
@@ -126,7 +121,7 @@ int main() {
             fclose(fp);
             fp = fopen(SOCKET_FILE, "r");
             if (!fp) {
-                printf("OPENING ERROR\n");
+                printf("OPENING ERROR\n")
                 perror("File reopen error");
                 // free(packet);
                 close(fd);
@@ -156,7 +151,6 @@ int main() {
                     //     strncpy(packet + packet_size, start, len);
                     //     packet_size += len;
                     //     packet[packet_size] = '\0';
-            close(fd);
 
         }
             // fflush(fp);  // Ensure file is updated
