@@ -94,12 +94,7 @@ int main() {
         inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
         syslog(LOG_INFO, "Accepted connection from %s", client_ip);
 
-        FILE *fp = fopen(SOCKET_FILE, "a");
-        if (!fp) {
-            perror("File open error");
-            close(fd);
-            continue;
-        }
+
 
         char buffer[BUFFER_SIZE];
         char wrt_buffer[BUFFER_SIZE];
@@ -107,7 +102,12 @@ int main() {
         size_t packet_size = 0;
 
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
-
+            FILE *fp = fopen(SOCKET_FILE, "a");
+            if (!fp) {
+                perror("File open error");
+                close(fd);
+                continue;
+            }
             printf("BLIB\n");
             buffer[res] = '\0';
             // char *newline = NULL;
