@@ -112,7 +112,7 @@ int main() {
             // Debugging print to show received data
             printf("Received buffer: %s\n", buffer);
 
-            while ((newline = strchr(start, '\n')) != NULL) {
+            // while ((newline = strchr(start, '\n')) != NULL) {
                 size_t len = newline - start + 1;
                 char *temp = realloc(packet, packet_size + len + 1);
                 if (!temp) {
@@ -167,7 +167,7 @@ int main() {
 
                 packet_size = 0;
                 start = newline + 1;
-            }
+            // }
 
             size_t remain_len = strlen(start);
             char *temp = realloc(packet, packet_size + remain_len + 1);
