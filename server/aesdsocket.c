@@ -131,7 +131,7 @@ int main() {
             //     strncpy(packet + packet_size, start, len);
             //     packet_size += len;
             //     packet[packet_size] = '\0';
-            fprintf(fp, "%s", packet);
+            fprintf(fp, "%s", buffer);
             fflush(fp);  // Ensure file is updated
 
             //     // Debugging print to show processed packet
@@ -143,7 +143,7 @@ int main() {
             fp = fopen(SOCKET_FILE, "r");
             if (!fp) {
                 perror("File reopen error");
-                free(packet);
+                // free(packet);
                 close(fd);
                 cleanup(sockfd, -1, NULL);
                 exit(EXIT_FAILURE);
