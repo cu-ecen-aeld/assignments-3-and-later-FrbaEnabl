@@ -132,6 +132,7 @@ int main() {
             //     packet_size += len;
             //     packet[packet_size] = '\0';
             fprintf(fp, "%s", buffer);
+            fclose(fp);
             // fflush(fp);  // Ensure file is updated
 
             //     // Debugging print to show processed packet
