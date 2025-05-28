@@ -114,77 +114,77 @@ int main() {
             // Debugging print to show received data
             printf("Received buffer: %s\n", buffer);
 
-            while ((newline = strchr(start, '\n')) != NULL) {
-                printf("BLAM");
-                size_t len = newline - start + 1;
-                char *temp = realloc(packet, packet_size + len + 1);
-                if (!temp) {
-                    fprintf(stderr, "Memory allocation error\n");
-                    free(packet);
-                    fclose(fp);
-                    close(fd);
-                    cleanup(sockfd, -1, NULL);
-                    exit(EXIT_FAILURE);
-                }
-                packet = temp;
-                strncpy(packet + packet_size, start, len);
-                packet_size += len;
-                packet[packet_size] = '\0';
-                fprintf(fp, "%s", packet);
-                fflush(fp);  // Ensure file is updated
+            // while ((newline = strchr(start, '\n')) != NULL) {
+            //     printf("BLAM");
+            //     size_t len = newline - start + 1;
+            //     char *temp = realloc(packet, packet_size + len + 1);
+            //     if (!temp) {
+            //         fprintf(stderr, "Memory allocation error\n");
+            //         free(packet);
+            //         fclose(fp);
+            //         close(fd);
+            //         cleanup(sockfd, -1, NULL);
+            //         exit(EXIT_FAILURE);
+            //     }
+            //     packet = temp;
+            //     strncpy(packet + packet_size, start, len);
+            //     packet_size += len;
+            //     packet[packet_size] = '\0';
+            //     fprintf(fp, "%s", packet);
+            //     fflush(fp);  // Ensure file is updated
 
-                // Debugging print to show processed packet
-                printf("Packet written to file: %s\n", packet);
+            //     // Debugging print to show processed packet
+            //     printf("Packet written to file: %s\n", packet);
 
-                // Finished handling this packet, now send the entire file
-                fclose(fp);
+            //     // Finished handling this packet, now send the entire file
+            //     fclose(fp);
 
-                fp = fopen(SOCKET_FILE, "r");
-                if (!fp) {
-                    perror("File reopen error");
-                    free(packet);
-                    close(fd);
-                    cleanup(sockfd, -1, NULL);
-                    exit(EXIT_FAILURE);
-                }
+            //     fp = fopen(SOCKET_FILE, "r");
+            //     if (!fp) {
+            //         perror("File reopen error");
+            //         free(packet);
+            //         close(fd);
+            //         cleanup(sockfd, -1, NULL);
+            //         exit(EXIT_FAILURE);
+            //     }
 
-                // Sending the entire file back to the client
-                rewind(fp);  // Move to the start of the file
-                while ((res = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
-                    printf("Sending file content: %.*s\n", res, buffer); // Debugging print
-                    // if (send(fd, buffer, res, 0) == -1) {
-                    //     perror("send error");
-                    //     break;
-                    // }
-                }
+            //     // Sending the entire file back to the client
+            //     rewind(fp);  // Move to the start of the file
+            //     while ((res = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
+            //         printf("Sending file content: %.*s\n", res, buffer); // Debugging print
+            //         if (send(fd, buffer, res, 0) == -1) {
+            //             perror("send error");
+            //             break;
+            //         }
+            //     }
 
-                fclose(fp);
-                fp = fopen(SOCKET_FILE, "a");
-                if (!fp) {
-                    perror("File reopen error");
-                    free(packet);
-                    close(fd);
-                    cleanup(sockfd, -1, NULL);
-                    exit(EXIT_FAILURE);
-                }
+            //     fclose(fp);
+            //     fp = fopen(SOCKET_FILE, "a");
+            //     if (!fp) {
+            //         perror("File reopen error");
+            //         free(packet);
+            //         close(fd);
+            //         cleanup(sockfd, -1, NULL);
+            //         exit(EXIT_FAILURE);
+            //     }
 
-                packet_size = 0;
-                start = newline + 1;
-            }
+            //     packet_size = 0;
+            //     start = newline + 1;
+            // }
 
-            size_t remain_len = strlen(start);
-            char *temp = realloc(packet, packet_size + remain_len + 1);
-            if (!temp) {
-                fprintf(stderr, "Memory allocation error\n");
-                free(packet);
-                fclose(fp);
-                close(fd);
-                cleanup(sockfd, -1, NULL);
-                exit(EXIT_FAILURE);
-            }
-            packet = temp;
-            strcpy(packet + packet_size, start);
-            packet_size += remain_len;
+            // size_t remain_len = strlen(start);
+            // char *temp = realloc(packet, packet_size + remain_len + 1);
+            // if (!temp) {
+            //     fprintf(stderr, "Memory allocation error\n");
+            //     free(packet);
+            //     fclose(fp);
+            //     close(fd);
+            //     cleanup(sockfd, -1, NULL);
+            //     exit(EXIT_FAILURE);
+            // }
+            // packet = temp;
+            // strcpy(packet + packet_size, start);
+            // packet_size += remain_len;
         }
 
         if (res == -1) {
