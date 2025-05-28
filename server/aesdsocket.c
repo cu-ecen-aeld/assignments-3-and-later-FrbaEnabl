@@ -77,34 +77,34 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    printf("RUN\n");
+    struct sockaddr addr;
+    socklen_t addrlen = sizeof(addr);
+    fd = accept(sockfd, &addr, &addrlen);
+    if (fd == -1) {
+        if (errno == EINTR) continue; // Interrupted by signal, retry
+        perror("accept error");
+        cleanup(sockfd, fd, NULL);
+        exit(EXIT_FAILURE);
+    }
+    
+    char client_ip[INET_ADDRSTRLEN];
+    struct sockaddr_in *client_addr = (struct sockaddr_in *) &addr;
+    inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
+    syslog(LOG_INFO, "Accepted connection from %s", client_ip);
+    
+    FILE *fp = fopen(SOCKET_FILE, "a");
+    if (!fp) {
+        perror("File open error");
+        close(fd);
+        continue;
+    }
+    
+    char buffer[BUFFER_SIZE];
+    char *packet = NULL;
+    size_t packet_size = 0;
+    
     while (run_flag) {
-        printf("RUN\n");
-        struct sockaddr addr;
-        socklen_t addrlen = sizeof(addr);
-        fd = accept(sockfd, &addr, &addrlen);
-        if (fd == -1) {
-            if (errno == EINTR) continue; // Interrupted by signal, retry
-            perror("accept error");
-            cleanup(sockfd, fd, NULL);
-            exit(EXIT_FAILURE);
-        }
-
-        char client_ip[INET_ADDRSTRLEN];
-        struct sockaddr_in *client_addr = (struct sockaddr_in *) &addr;
-        inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
-        syslog(LOG_INFO, "Accepted connection from %s", client_ip);
-
-        FILE *fp = fopen(SOCKET_FILE, "a");
-        if (!fp) {
-            perror("File open error");
-            close(fd);
-            continue;
-        }
-
-        char buffer[BUFFER_SIZE];
-        char *packet = NULL;
-        size_t packet_size = 0;
-
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
 
             printf("BLIB");
