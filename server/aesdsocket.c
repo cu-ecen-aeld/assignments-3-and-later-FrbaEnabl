@@ -18,7 +18,7 @@ static volatile sig_atomic_t run_flag = 1;
 
 void handle_signal(int signal) {
     syslog(LOG_INFO, "Caught signal, exiting");
-    run_flag = 0;
+    exit(1);    
 }
 
 void cleanup(int sockfd, int fd, FILE *fp) {
