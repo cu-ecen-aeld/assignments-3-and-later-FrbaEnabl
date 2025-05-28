@@ -151,7 +151,7 @@ int main() {
 
             //     // Sending the entire file back to the client
             //     rewind(fp);  // Move to the start of the file
-            res = fread(buffer, 1, sizeof(buffer), fp)
+            res = fread(buffer, 1, sizeof(buffer), fp);
             printf("Sending file content: %.*s\n", res, buffer); // Debugging print
             if (send(fd, buffer, res, 0) == -1) {
                 perror("send error");
