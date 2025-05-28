@@ -77,61 +77,62 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    printf("RUN\n");
-    struct sockaddr addr;
-    socklen_t addrlen = sizeof(addr);
-    fd = accept(sockfd, &addr, &addrlen);
-    if (fd == -1) {
-        if (errno == EINTR) exit(EXIT_FAILURE); // Interrupted by signal, retry
-        perror("accept error");
-        cleanup(sockfd, fd, NULL);
-        exit(EXIT_FAILURE);
-    }
-    
-    char client_ip[INET_ADDRSTRLEN];
-    struct sockaddr_in *client_addr = (struct sockaddr_in *) &addr;
-    inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
-    syslog(LOG_INFO, "Accepted connection from %s", client_ip);
-    
-    FILE *fp = fopen(SOCKET_FILE, "a");
-    if (!fp) {
-        perror("File open error");
-        close(fd);
-        exit(EXIT_FAILURE);
-    }
-    
-    char buffer[BUFFER_SIZE];
-    char *packet = NULL;
-    size_t packet_size = 0;
-    
     while (run_flag) {
+        printf("RUN\n");
+        struct sockaddr addr;
+        socklen_t addrlen = sizeof(addr);
+        fd = accept(sockfd, &addr, &addrlen);
+        if (fd == -1) {
+            if (errno == EINTR) continue; // Interrupted by signal, retry
+            perror("accept error");
+            cleanup(sockfd, fd, NULL);
+            exit(EXIT_FAILURE);
+        }
+
+        char client_ip[INET_ADDRSTRLEN];
+        struct sockaddr_in *client_addr = (struct sockaddr_in *) &addr;
+        inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
+        syslog(LOG_INFO, "Accepted connection from %s", client_ip);
+
+        FILE *fp = fopen(SOCKET_FILE, "a");
+        if (!fp) {
+            perror("File open error");
+            close(fd);
+            continue;
+        }
+
+        char buffer[BUFFER_SIZE];
+        char *packet = NULL;
+        size_t packet_size = 0;
+
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
 
             printf("BLIB");
             buffer[res] = '\0';
             // char *newline = NULL;
             // char *start = buffer;
-
+            
             // Debugging print to show received data
             printf("Received buffer: %s\n", buffer);
-
+            
             // while ((newline = strchr(start, '\n')) != NULL) {
-            //     printf("BLAM");
-            //     size_t len = newline - start + 1;
-            //     char *temp = realloc(packet, packet_size + len + 1);
-            //     if (!temp) {
-            //         fprintf(stderr, "Memory allocation error\n");
-            //         free(packet);
-            //         fclose(fp);
-            //         close(fd);
-            //         cleanup(sockfd, -1, NULL);
-            //         exit(EXIT_FAILURE);
-            //     }
-            //     packet = temp;
-            //     strncpy(packet + packet_size, start, len);
-            //     packet_size += len;
-            //     packet[packet_size] = '\0';
+                //     printf("BLAM");
+                //     size_t len = newline - start + 1;
+                //     char *temp = realloc(packet, packet_size + len + 1);
+                //     if (!temp) {
+                    //         fprintf(stderr, "Memory allocation error\n");
+                    //         free(packet);
+                    //         fclose(fp);
+                    //         close(fd);
+                    //         cleanup(sockfd, -1, NULL);
+                    //         exit(EXIT_FAILURE);
+                    //     }
+                    //     packet = temp;
+                    //     strncpy(packet + packet_size, start, len);
+                    //     packet_size += len;
+                    //     packet[packet_size] = '\0';
             fprintf(fp, "%s", buffer);
+        }
             fclose(fp);
             // fflush(fp);  // Ensure file is updated
 
@@ -186,7 +187,6 @@ int main() {
             // packet = temp;
             // strcpy(packet + packet_size, start);
             // packet_size += remain_len;
-        }
 
         if (res == -1) {
             perror("recv error");
