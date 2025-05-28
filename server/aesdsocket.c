@@ -118,6 +118,15 @@ int main() {
 
             int f_res = fprintf(fp, "%s", buffer);
             printf("Bytes written: %d\n", f_res);
+            fclose(fp);
+            fp = fopen(SOCKET_FILE, "r");
+            if (!fp) {
+                perror("File reopen error");
+                // free(packet);
+                close(fd);
+                cleanup(sockfd, -1, NULL);
+                exit(EXIT_FAILURE);
+            }
             res = fread(wrt_buffer, 1, sizeof(wrt_buffer), fp);
             printf("Sending file content: %.*s", res, wrt_buffer); // Debugging print
             // if (send(fd, wrt_buffer, res, 0) == -1) {
@@ -143,7 +152,6 @@ int main() {
                     //     packet[packet_size] = '\0';
 
         }
-            fclose(fp);
             // fflush(fp);  // Ensure file is updated
 
             //     // Debugging print to show processed packet
@@ -152,14 +160,7 @@ int main() {
             //     // Finished handling this packet, now send the entire file
             //     fclose(fp);
 
-            fp = fopen(SOCKET_FILE, "r");
-            if (!fp) {
-                perror("File reopen error");
-                // free(packet);
-                close(fd);
-                cleanup(sockfd, -1, NULL);
-                exit(EXIT_FAILURE);
-            }
+
 
             //     // Sending the entire file back to the client
             //     rewind(fp);  // Move to the start of the file
