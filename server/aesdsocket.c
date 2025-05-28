@@ -121,6 +121,7 @@ int main() {
             fclose(fp);
             fp = fopen(SOCKET_FILE, "r");
             if (!fp) {
+                printf("OPENING ERROR\n");
                 perror("File reopen error");
                 // free(packet);
                 close(fd);
