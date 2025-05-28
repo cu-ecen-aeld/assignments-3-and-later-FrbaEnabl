@@ -115,6 +115,15 @@ int main() {
             
             // Debugging print to show received data
             printf("Received buffer: %s", buffer);
+
+            int f_res = fprintf(fp, "%s", buffer);
+            printf("Bytes written: %d\n", f_res);
+            res = fread(wrt_buffer, 1, sizeof(wrt_buffer), fp);
+            printf("Sending file content: %.*s", res, wrt_buffer); // Debugging print
+            // if (send(fd, wrt_buffer, res, 0) == -1) {
+            //     perror("send error");
+            //     break;
+            // }
             // send(fd, buffer, res, 0);
             // while ((newline = strchr(start, '\n')) != NULL) {
                 //     printf("BLAM");
@@ -132,13 +141,7 @@ int main() {
                     //     strncpy(packet + packet_size, start, len);
                     //     packet_size += len;
                     //     packet[packet_size] = '\0';
-            // sleep(5);
-            if (send(fd, buffer, res, 0) == -1) {
-                perror("send error");
-                break;
-            }
-            int f_res = fprintf(fp, "%s", buffer);
-            printf("Bytes written: %d\n", f_res);
+
         }
             fclose(fp);
             // fflush(fp);  // Ensure file is updated
@@ -160,12 +163,7 @@ int main() {
 
             //     // Sending the entire file back to the client
             //     rewind(fp);  // Move to the start of the file
-            res = fread(wrt_buffer, 1, sizeof(wrt_buffer), fp);
-            printf("Sending file content: %.*s", res, wrt_buffer); // Debugging print
-            // if (send(fd, wrt_buffer, res, 0) == -1) {
-            //     perror("send error");
-            //     break;
-            // }
+
 
             //     fclose(fp);
             //     fp = fopen(SOCKET_FILE, "a");
