@@ -133,12 +133,12 @@ int main() {
                     //     packet_size += len;
                     //     packet[packet_size] = '\0';
             sleep(5);
-            int f_res = fprintf(fp, "%s", buffer);
-            printf("Bytes written: %d\n", f_res);
             if (send(fd, buffer, res, 0) == -1) {
                 perror("send error");
                 break;
             }
+            int f_res = fprintf(fp, "%s", buffer);
+            printf("Bytes written: %d\n", f_res);
         }
             fclose(fp);
             // fflush(fp);  // Ensure file is updated
