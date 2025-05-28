@@ -133,9 +133,10 @@ int main() {
                 // Sending the latest complete packet back to the client
                 if (send(fd, packet, packet_size, 0) == -1) {
                     perror("send error");
+                    printf("Send failed: %s", packet);
                     break;
                 }
-
+                printf("Send succeeded: %s", packet);
                 packet_size = 0;
                 start = newline + 1;
             }
