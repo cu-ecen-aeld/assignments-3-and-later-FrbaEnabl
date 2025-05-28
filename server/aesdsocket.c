@@ -82,7 +82,7 @@ int main() {
     socklen_t addrlen = sizeof(addr);
     fd = accept(sockfd, &addr, &addrlen);
     if (fd == -1) {
-        if (errno == EINTR) continue; // Interrupted by signal, retry
+        if (errno == EINTR) exit(EXIT_FAILURE); // Interrupted by signal, retry
         perror("accept error");
         cleanup(sockfd, fd, NULL);
         exit(EXIT_FAILURE);
