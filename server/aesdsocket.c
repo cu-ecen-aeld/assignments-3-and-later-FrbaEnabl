@@ -41,6 +41,14 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    // Set the SO_REUSEADDR option
+    int optval = 1;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
+        perror("setsockopt error");
+        cleanup(sockfd, fd, NULL);
+        exit(EXIT_FAILURE);
+    }
+
     struct addrinfo hints, *servinfo;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
