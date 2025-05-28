@@ -104,19 +104,16 @@ int main() {
         char buffer[BUFFER_SIZE];
         char *packet = NULL;
         size_t packet_size = 0;
-
+            
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
 
             printf("BLIB");
-            // if(buffer[res] == '\n'){
-            //     buffer[res] = '\0';
-            // }
+            buffer[res] = '\0';
             // char *newline = NULL;
             // char *start = buffer;
 
             // Debugging print to show received data
             printf("Received buffer: %s\n", buffer);
-            printf("Buf len: %d\n", sizeof(buffer));
             // while ((newline = strchr(start, '\n')) != NULL) {
             //     printf("BLAM");
             //     size_t len = newline - start + 1;
