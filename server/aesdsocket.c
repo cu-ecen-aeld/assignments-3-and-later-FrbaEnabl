@@ -78,6 +78,7 @@ int main() {
     }
 
     while (run_flag) {
+        printf("RUN");
         struct sockaddr addr;
         socklen_t addrlen = sizeof(addr);
         fd = accept(sockfd, &addr, &addrlen);
