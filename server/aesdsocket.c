@@ -132,7 +132,7 @@ int main() {
                     //     strncpy(packet + packet_size, start, len);
                     //     packet_size += len;
                     //     packet[packet_size] = '\0';
-            sleep(5);
+            // sleep(5);
             if (send(fd, buffer, res, 0) == -1) {
                 perror("send error");
                 break;
