@@ -132,7 +132,7 @@ int main() {
                     //     packet_size += len;
                     //     packet[packet_size] = '\0';
             int f_res = fprintf(fp, "%s", buffer);
-            print("Bytes written: %d", f_res)
+            print("Bytes written: %d", f_res);
         }
             fclose(fp);
             // fflush(fp);  // Ensure file is updated
