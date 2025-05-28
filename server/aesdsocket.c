@@ -114,7 +114,7 @@ int main() {
             
             // Debugging print to show received data
             printf("Received buffer: %s", buffer);
-            strcpy(tester, buffer;)
+            strcpy(tester, buffer);
             // while ((newline = strchr(start, '\n')) != NULL) {
                 //     printf("BLAM");
                 //     size_t len = newline - start + 1;
