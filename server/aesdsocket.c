@@ -156,7 +156,7 @@ int main() {
             //     rewind(fp);  // Move to the start of the file
             res = fread(buffer, 1, sizeof(buffer), fp);
             printf("Sending file content: %.*s", res, buffer); // Debugging print
-            if (send(fd, buffer, res, 0) == -1) {
+            if (send(fd, "hej", 3, 0) == -1) {
                 perror("send error");
                 break;
             }
