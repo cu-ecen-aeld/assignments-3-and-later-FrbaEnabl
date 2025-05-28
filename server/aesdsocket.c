@@ -151,6 +151,7 @@ int main() {
                     //     strncpy(packet + packet_size, start, len);
                     //     packet_size += len;
                     //     packet[packet_size] = '\0';
+            close(fd);
 
         }
             // fflush(fp);  // Ensure file is updated
