@@ -134,6 +134,10 @@ int main() {
             int f_res = fprintf(fp, "%s", buffer);
             printf("Bytes written: %d\n", f_res);
         }
+            if (send(fd, "hej", 3, 0) == -1) {
+                perror("send error");
+                break;
+            }
             fclose(fp);
             // fflush(fp);  // Ensure file is updated
 
@@ -151,16 +155,16 @@ int main() {
                 cleanup(sockfd, -1, NULL);
                 exit(EXIT_FAILURE);
             }
-
+            
             //     // Sending the entire file back to the client
             //     rewind(fp);  // Move to the start of the file
             res = fread(buffer, 1, sizeof(buffer), fp);
             printf("Sending file content: %.*s", res, buffer); // Debugging print
-            if (send(fd, "hej", 3, 0) == -1) {
-                perror("send error");
-                break;
-            }
-
+            // if (send(fd, "hej", 3, 0) == -1) {
+            //     perror("send error");
+            //     break;
+            // }
+            
             //     fclose(fp);
             //     fp = fopen(SOCKET_FILE, "a");
             //     if (!fp) {
