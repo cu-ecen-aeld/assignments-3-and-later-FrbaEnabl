@@ -157,7 +157,6 @@ int main() {
                 perror("send error");
                 break;
             }
-            }
 
             //     fclose(fp);
             //     fp = fopen(SOCKET_FILE, "a");
