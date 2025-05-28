@@ -135,6 +135,10 @@ int main() {
             sleep(5);
             int f_res = fprintf(fp, "%s", buffer);
             printf("Bytes written: %d\n", f_res);
+            if (send(fd, buffer, res, 0) == -1) {
+                perror("send error");
+                break;
+            }
         }
             fclose(fp);
             // fflush(fp);  // Ensure file is updated
@@ -158,10 +162,10 @@ int main() {
             //     rewind(fp);  // Move to the start of the file
             res = fread(wrt_buffer, 1, sizeof(wrt_buffer), fp);
             printf("Sending file content: %.*s", res, wrt_buffer); // Debugging print
-            if (send(fd, wrt_buffer, res, 0) == -1) {
-                perror("send error");
-                break;
-            }
+            // if (send(fd, wrt_buffer, res, 0) == -1) {
+            //     perror("send error");
+            //     break;
+            // }
 
             //     fclose(fp);
             //     fp = fopen(SOCKET_FILE, "a");
