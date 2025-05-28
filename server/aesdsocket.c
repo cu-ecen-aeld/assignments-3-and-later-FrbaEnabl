@@ -151,6 +151,8 @@ int main() {
                     //     strncpy(packet + packet_size, start, len);
                     //     packet_size += len;
                     //     packet[packet_size] = '\0';
+                    
+            fclose(fp);
 
         }
             // fflush(fp);  // Ensure file is updated
@@ -201,7 +203,7 @@ int main() {
 
         syslog(LOG_INFO, "Closed connection from %s", client_ip);
         free(packet);
-        fclose(fp);
+        // fclose(fp);
         close(fd);
         fd = -1; // Reset fd for the next loop
     }
