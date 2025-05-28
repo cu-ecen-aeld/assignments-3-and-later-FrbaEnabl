@@ -104,7 +104,7 @@ int main() {
         char buffer[BUFFER_SIZE];
         char *packet = NULL;
         size_t packet_size = 0;
-            
+
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
 
             printf("BLIB");
@@ -114,6 +114,7 @@ int main() {
 
             // Debugging print to show received data
             printf("Received buffer: %s\n", buffer);
+
             // while ((newline = strchr(start, '\n')) != NULL) {
             //     printf("BLAM");
             //     size_t len = newline - start + 1;
