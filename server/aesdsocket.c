@@ -129,10 +129,10 @@ int main() {
             }
             res = fread(wrt_buffer, 1, sizeof(wrt_buffer), fp);
             printf("Sending file content: %.*s", res, wrt_buffer); // Debugging print
-            // if (send(fd, wrt_buffer, res, 0) == -1) {
-            //     perror("send error");
-            //     break;
-            // }
+            if (send(fd, wrt_buffer, res, 0) == -1) {
+                perror("send error");
+                break;
+            }
             // send(fd, buffer, res, 0);
             // while ((newline = strchr(start, '\n')) != NULL) {
                 //     printf("BLAM");
