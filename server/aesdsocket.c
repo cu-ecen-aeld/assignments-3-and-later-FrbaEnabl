@@ -78,7 +78,7 @@ int main() {
     }
 
     while (run_flag) {
-        printf("RUN");
+        // printf("RUN");
         struct sockaddr addr;
         socklen_t addrlen = sizeof(addr);
         fd = accept(sockfd, &addr, &addrlen);
@@ -106,7 +106,8 @@ int main() {
         size_t packet_size = 0;
 
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
-            printf("BLIB");
+
+            // printf("BLIB");
             // buffer[res] = '\0';
             // char *newline = NULL;
             // char *start = buffer;
@@ -130,8 +131,8 @@ int main() {
             //     strncpy(packet + packet_size, start, len);
             //     packet_size += len;
             //     packet[packet_size] = '\0';
-            //     fprintf(fp, "%s", packet);
-            //     fflush(fp);  // Ensure file is updated
+            fprintf(fp, "%s", packet);
+            fflush(fp);  // Ensure file is updated
 
             //     // Debugging print to show processed packet
             //     printf("Packet written to file: %s\n", packet);
@@ -139,24 +140,24 @@ int main() {
             //     // Finished handling this packet, now send the entire file
             //     fclose(fp);
 
-            //     fp = fopen(SOCKET_FILE, "r");
-            //     if (!fp) {
-            //         perror("File reopen error");
-            //         free(packet);
-            //         close(fd);
-            //         cleanup(sockfd, -1, NULL);
-            //         exit(EXIT_FAILURE);
-            //     }
+            fp = fopen(SOCKET_FILE, "r");
+            if (!fp) {
+                perror("File reopen error");
+                free(packet);
+                close(fd);
+                cleanup(sockfd, -1, NULL);
+                exit(EXIT_FAILURE);
+            }
 
             //     // Sending the entire file back to the client
             //     rewind(fp);  // Move to the start of the file
-            //     while ((res = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
-            //         printf("Sending file content: %.*s\n", res, buffer); // Debugging print
-            //         if (send(fd, buffer, res, 0) == -1) {
-            //             perror("send error");
-            //             break;
-            //         }
-            //     }
+            while ((res = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
+                printf("Sending file content: %.*s\n", res, buffer); // Debugging print
+                if (send(fd, buffer, res, 0) == -1) {
+                    perror("send error");
+                    break;
+                }
+            }
 
             //     fclose(fp);
             //     fp = fopen(SOCKET_FILE, "a");
