@@ -107,9 +107,9 @@ int main() {
 
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
             printf("BLIB");
-            buffer[res] = '\0';
-            char *newline = NULL;
-            char *start = buffer;
+            // buffer[res] = '\0';
+            // char *newline = NULL;
+            // char *start = buffer;
 
             // Debugging print to show received data
             printf("Received buffer: %s\n", buffer);
