@@ -105,7 +105,7 @@ int main() {
         size_t packet_size = 0;
 
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
-            print("BLIB");
+            printf("BLIB");
             buffer[res] = '\0';
             char *newline = NULL;
             char *start = buffer;
@@ -114,7 +114,7 @@ int main() {
             printf("Received buffer: %s\n", buffer);
 
             while ((newline = strchr(start, '\n')) != NULL) {
-                print("BLAM");
+                printf("BLAM");
                 size_t len = newline - start + 1;
                 char *temp = realloc(packet, packet_size + len + 1);
                 if (!temp) {
