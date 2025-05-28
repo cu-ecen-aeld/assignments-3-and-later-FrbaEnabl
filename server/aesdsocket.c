@@ -104,7 +104,7 @@ int main() {
         char buffer[BUFFER_SIZE];
         char *packet = NULL;
         size_t packet_size = 0;
-
+        char* tester;
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
 
             printf("BLIB\n");
@@ -114,7 +114,7 @@ int main() {
             
             // Debugging print to show received data
             printf("Received buffer: %s", buffer);
-            send(fd, buffer, res, 0);
+            *tester = *buffer;
             // while ((newline = strchr(start, '\n')) != NULL) {
                 //     printf("BLAM");
                 //     size_t len = newline - start + 1;
@@ -156,10 +156,11 @@ int main() {
             //     rewind(fp);  // Move to the start of the file
             res = fread(buffer, 1, sizeof(buffer), fp);
             printf("Sending file content: %.*s", res, buffer); // Debugging print
-            if (send(fd, buffer, res, 0) == -1) {
-                perror("send error");
-                break;
-            }
+            send(fd, buffer, res, 0);
+            // if (send(fd, buffer, res, 0) == -1) {
+            //     perror("send error");
+            //     break;
+            // }
 
             //     fclose(fp);
             //     fp = fopen(SOCKET_FILE, "a");
