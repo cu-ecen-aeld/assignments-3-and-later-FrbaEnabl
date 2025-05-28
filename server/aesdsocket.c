@@ -132,7 +132,7 @@ int main() {
                     //     strncpy(packet + packet_size, start, len);
                     //     packet_size += len;
                     //     packet[packet_size] = '\0';
-            sleep(5)
+            sleep(5);
             int f_res = fprintf(fp, "%s", buffer);
             printf("Bytes written: %d\n", f_res);
         }
