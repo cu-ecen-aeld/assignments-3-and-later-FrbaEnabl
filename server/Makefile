@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -O2
 TARGET = aesdsocket
 
 # Source files
-SRCS = aesdsocket .c
+SRCS = aesdsocket.c
 OBJS = $(SRCS:.c=.o)
 
 # Default target: build the application
