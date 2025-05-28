@@ -107,7 +107,7 @@ int main() {
 
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
 
-            // printf("BLIB");
+            printf("BLIB");
             buffer[res] = '\0';
             // char *newline = NULL;
             // char *start = buffer;
