@@ -93,7 +93,7 @@ int main() {
         inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
         syslog(LOG_INFO, "Accepted connection from %s", client_ip);
 
-        FILE *fp = fopen(SOCKET_FILE, "a+");
+        FILE *fp = fopen(SOCKET_FILE, "a");
         if (!fp) {
             perror("File open error");
             close(fd);
@@ -125,14 +125,12 @@ int main() {
                 packet_size += len;
                 packet[packet_size] = '\0';
                 fprintf(fp, "%s", packet);
-                fflush(fp); // Ensure file is updated
+                fflush(fp);  // Ensure file is updated
 
-                rewind(fp);
-                while ((res = fread(buffer, 1, BUFFER_SIZE, fp)) > 0) {
-                    if (send(fd, buffer, res, 0) == -1) {
-                        perror("send error");
-                        break;
-                    }
+                // Sending the latest complete packet back to the client
+                if (send(fd, packet, packet_size, 0) == -1) {
+                    perror("send error");
+                    break;
                 }
 
                 packet_size = 0;
