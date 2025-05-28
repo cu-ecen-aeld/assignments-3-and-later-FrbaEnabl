@@ -112,7 +112,7 @@ int main() {
             // Debugging print to show received data
             printf("Received buffer: %s\n", buffer);
 
-            // while ((newline = strchr(start, '\n')) != NULL) {
+            while ((newline = strchr(start, '\n')) != NULL) {
                 size_t len = newline - start + 1;
                 char *temp = realloc(packet, packet_size + len + 1);
                 if (!temp) {
@@ -167,11 +167,11 @@ int main() {
 
                 packet_size = 0;
                 start = newline + 1;
-            // }
+            }
 
             size_t remain_len = strlen(start);
-            char *temp2 = realloc(packet, packet_size + remain_len + 1);
-            if (!temp2) {
+            char *temp = realloc(packet, packet_size + remain_len + 1);
+            if (!temp) {
                 fprintf(stderr, "Memory allocation error\n");
                 free(packet);
                 fclose(fp);
@@ -179,7 +179,7 @@ int main() {
                 cleanup(sockfd, -1, NULL);
                 exit(EXIT_FAILURE);
             }
-            packet = temp2;
+            packet = temp;
             strcpy(packet + packet_size, start);
             packet_size += remain_len;
         }
