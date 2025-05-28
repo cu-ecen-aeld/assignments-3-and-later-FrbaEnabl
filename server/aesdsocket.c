@@ -107,7 +107,7 @@ int main() {
 
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
 
-            printf("BLIB");
+            printf("BLIB\n");
             buffer[res] = '\0';
             // char *newline = NULL;
             // char *start = buffer;
@@ -132,7 +132,7 @@ int main() {
                     //     packet_size += len;
                     //     packet[packet_size] = '\0';
             int f_res = fprintf(fp, "%s", buffer);
-            printf("Bytes written: %d", f_res);
+            printf("Bytes written: %d\n", f_res);
         }
             fclose(fp);
             // fflush(fp);  // Ensure file is updated
@@ -155,7 +155,7 @@ int main() {
             //     // Sending the entire file back to the client
             //     rewind(fp);  // Move to the start of the file
             res = fread(buffer, 1, sizeof(buffer), fp);
-            printf("Sending file content: %.*s\n", res, buffer); // Debugging print
+            printf("Sending file content: %.*s", res, buffer); // Debugging print
             if (send(fd, buffer, res, 0) == -1) {
                 perror("send error");
                 break;
