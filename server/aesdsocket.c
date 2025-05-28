@@ -107,7 +107,12 @@ int main() {
         size_t packet_size = 0;
 
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
-
+            FILE *fp = fopen(SOCKET_FILE, "a");
+            if (!fp) {
+                perror("File open error");
+                close(fd);
+                continue;
+            }
             printf("BLIB\n");
             buffer[res] = '\0';
             // char *newline = NULL;
