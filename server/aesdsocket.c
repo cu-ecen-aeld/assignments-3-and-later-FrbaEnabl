@@ -107,7 +107,7 @@ int main() {
 
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
             printf("BLIB");
-            // buffer[res] = '\0';
+            buffer[res] = '\0';
             char *newline = NULL;
             char *start = buffer;
 
@@ -152,10 +152,10 @@ int main() {
                 rewind(fp);  // Move to the start of the file
                 while ((res = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
                     printf("Sending file content: %.*s\n", res, buffer); // Debugging print
-                    if (send(fd, buffer, res, 0) == -1) {
-                        perror("send error");
-                        break;
-                    }
+                    // if (send(fd, buffer, res, 0) == -1) {
+                    //     perror("send error");
+                    //     break;
+                    // }
                 }
 
                 fclose(fp);
