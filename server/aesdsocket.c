@@ -105,7 +105,7 @@ int main() {
 
 
         char buffer[BUFFER_SIZE];
-        // char wrt_buffer[BUFFER_SIZE];
+        char wrt_buffer[BUFFER_SIZE];
         char *packet = NULL;
         size_t packet_size = 0;
 
