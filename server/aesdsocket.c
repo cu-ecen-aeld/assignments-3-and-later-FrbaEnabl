@@ -127,9 +127,20 @@ int main() {
                     perror("File open error");
                 }
 
-                // Send the message back to the client
-                if (send(fd, packet, packet_size, 0) == -1) {
-                    perror("send error");
+                // Send the entire contents of the file back to the client
+                fp = fopen(SOCKET_FILE, "r");
+                if (fp) {
+                    char file_buffer[BUFFER_SIZE];
+                    size_t bytes_read;
+                    while ((bytes_read = fread(file_buffer, 1, sizeof(file_buffer), fp)) > 0) {
+                        if (send(fd, file_buffer, bytes_read, 0) == -1) {
+                            perror("send error");
+                            break;
+                        }
+                    }
+                    fclose(fp);
+                } else {
+                    perror("File open error");
                 }
 
                 free(packet);
