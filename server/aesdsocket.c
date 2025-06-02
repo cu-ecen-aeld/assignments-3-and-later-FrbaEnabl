@@ -150,9 +150,9 @@ int main() {
                 printf("%s", buffer);
             }
                 // Check for reading errors
-            if (ferror(file)) {
-                perror("Error reading file");
-                fclose(file);
+            if (ferror(fp)) {
+                perror("Error reading fp");
+                fclose(fp);
                 return EXIT_FAILURE;
             }
             fclose(fp);
