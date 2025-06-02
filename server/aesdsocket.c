@@ -34,6 +34,14 @@ int main() {
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
 
+    // Open the file with write mode to clear its contents at the start
+    FILE *fp = fopen(SOCKET_FILE, "w");
+    if (!fp) {
+        perror("File open error");
+        exit(EXIT_FAILURE);
+    }
+    fclose(fp);
+
     int sockfd = -1, fd = -1;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
@@ -75,7 +83,7 @@ int main() {
         perror("listen error");
         cleanup(sockfd, fd, NULL);
         exit(EXIT_FAILURE);
-    }
+        }
 
     while (run_flag) {
         printf("RUN\n");
