@@ -31,72 +31,74 @@ void cleanup(int sockfd, int fd, FILE *fp) {
 
 void write_to_file(const char *data) {
     FILE *fp = fopen(SOCKET_FILE, "a");
-    if (fp) {
+    if (!fp) {
+        syslog(LOG_ERR, "File open error: %s", strerror(errno));
+    } else {
         fprintf(fp, "%s", data);
         fclose(fp);
-    } else {
-        perror("File open error");
     }
 }
 
 void send_file_contents(int fd) {
     FILE *fp = fopen(SOCKET_FILE, "r");
-    if (fp) {
+    if (!fp) {
+        syslog(LOG_ERR, "File open error: %s", strerror(errno));
+    } else {
         char file_buffer[BUFFER_SIZE];
         size_t bytes_read;
         while ((bytes_read = fread(file_buffer, 1, sizeof(file_buffer), fp)) > 0) {
             if (send(fd, file_buffer, bytes_read, 0) == -1) {
-                perror("send error");
+                syslog(LOG_ERR, "Send error: %s", strerror(errno));
                 break;
             }
         }
         fclose(fp);
-    } else {
-        perror("File open error");
     }
 }
 
 void daemonize() {
     pid_t pid = fork();
     if (pid < 0) {
-        perror("fork error");
+        syslog(LOG_ERR, "Fork error: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
     if (pid > 0) {
         exit(EXIT_SUCCESS); // Terminate the parent process
     }
 
-    // Start a new session
     if (setsid() < 0) {
-        perror("setsid error");
+        syslog(LOG_ERR, "setsid error: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    // Fork again to avoid acquiring a controlling terminal
     pid = fork();
     if (pid < 0) {
-        perror("fork error");
+        syslog(LOG_ERR, "Fork error: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
     if (pid > 0) {
         exit(EXIT_SUCCESS); // Terminate the parent process
     }
 
-    // Change the current working directory to root
     if (chdir("/") < 0) {
-        perror("chdir error");
+        syslog(LOG_ERR, "chdir error: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    // Close all file descriptors
     for (int x = sysconf(_SC_OPEN_MAX); x >= 0; x--) {
         close(x);
     }
 
-    // Redirect standard I/O to /dev/null
-    open("/dev/null", O_RDWR); // stdin
-    dup(0); // stdout
-    dup(0); // stderr
+    int fd = open("/dev/null", O_RDWR);
+    if (fd != -1) {
+        dup2(fd, STDIN_FILENO);
+        dup2(fd, STDOUT_FILENO);
+        dup2(fd, STDERR_FILENO);
+        close(fd);
+    } else {
+        syslog(LOG_ERR, "Failed to open /dev/null: %s", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -115,27 +117,28 @@ int main(int argc, char *argv[]) {
     }
 
     openlog("aesdsocket", LOG_PID, LOG_USER);
+    syslog(LOG_INFO, "Program started");
+
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
 
     FILE *fp = fopen(SOCKET_FILE, "w");
     if (!fp) {
-        perror("File open error");
+        syslog(LOG_ERR, "File open error: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
     fclose(fp);
 
-    // Set up socket connection
     int sockfd = -1, fd = -1;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
-        perror("socket creation error");
+        syslog(LOG_ERR, "Socket creation error: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     int optval = 1;
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
-        perror("setsockopt error");
+        syslog(LOG_ERR, "setsockopt error: %s", strerror(errno));
         cleanup(sockfd, fd, NULL);
         exit(EXIT_FAILURE);
     }
@@ -148,14 +151,14 @@ int main(int argc, char *argv[]) {
 
     int res = getaddrinfo(NULL, "9000", &hints, &servinfo);
     if (res != 0) {
-        fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(res));
+        syslog(LOG_ERR, "getaddrinfo error: %s", gai_strerror(res));
         cleanup(sockfd, fd, NULL);
         exit(EXIT_FAILURE);
     }
 
     res = bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen);
     if (res != 0) {
-        perror("bind error");
+        syslog(LOG_ERR, "bind error: %s", strerror(errno));
         freeaddrinfo(servinfo);
         cleanup(sockfd, fd, NULL);
         exit(EXIT_FAILURE);
@@ -163,12 +166,11 @@ int main(int argc, char *argv[]) {
     freeaddrinfo(servinfo);
 
     if (listen(sockfd, 5) != 0) {
-        perror("listen error");
+        syslog(LOG_ERR, "listen error: %s", strerror(errno));
         cleanup(sockfd, fd, NULL);
         exit(EXIT_FAILURE);
     }
 
-    // Daemonize after binding to port is successful
     if (daemon_mode) {
         daemonize();
     }
@@ -186,7 +188,7 @@ int main(int argc, char *argv[]) {
         if (res == -1) {
             if (errno == EINTR)
                 continue;
-            perror("select error");
+            syslog(LOG_ERR, "select error: %s", strerror(errno));
             cleanup(sockfd, fd, NULL);
             exit(EXIT_FAILURE);
         }
@@ -200,7 +202,7 @@ int main(int argc, char *argv[]) {
             fd = accept(sockfd, &addr, &addrlen);
             if (fd == -1) {
                 if (errno == EINTR) continue;
-                perror("accept error");
+                syslog(LOG_ERR, "accept error: %s", strerror(errno));
                 cleanup(sockfd, fd, NULL);
                 exit(EXIT_FAILURE);
             }
@@ -222,7 +224,7 @@ int main(int argc, char *argv[]) {
                     size_t part_size = newline_pos - buffer + 1;
                     char *new_packet = realloc(packet, packet_size + part_size + 1);
                     if (!new_packet) {
-                        perror("Memory allocation error");
+                        syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
                         free(packet);
                         cleanup(sockfd, fd, NULL);
                         exit(EXIT_FAILURE);
@@ -233,7 +235,7 @@ int main(int argc, char *argv[]) {
                     packet_size += part_size;
                     packet[packet_size] = '\0';
 
-                    printf("Received message: %s", packet);
+                    syslog(LOG_INFO, "Received message: %s", packet);
 
                     write_to_file(packet);
 
@@ -247,7 +249,7 @@ int main(int argc, char *argv[]) {
                     if (remaining_size > 0) {
                         new_packet = realloc(packet, remaining_size + 1);
                         if (!new_packet) {
-                            perror("Memory allocation error");
+                            syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
                             free(packet);
                             cleanup(sockfd, fd, NULL);
                             exit(EXIT_FAILURE);
@@ -261,7 +263,7 @@ int main(int argc, char *argv[]) {
                 } else {
                     char *new_packet = realloc(packet, packet_size + res + 1);
                     if (!new_packet) {
-                        perror("Memory allocation error");
+                        syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
                         free(packet);
                         cleanup(sockfd, fd, NULL);
                         exit(EXIT_FAILURE);
@@ -277,7 +279,7 @@ int main(int argc, char *argv[]) {
             free(packet);
 
             if (res == -1) {
-                perror("recv error");
+                syslog(LOG_ERR, "recv error: %s", strerror(errno));
             }
 
             syslog(LOG_INFO, "Closed connection from %s", client_ip);
@@ -286,6 +288,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    syslog(LOG_INFO, "Program terminated");
     cleanup(sockfd, fd, NULL);
     return 0;
 }
