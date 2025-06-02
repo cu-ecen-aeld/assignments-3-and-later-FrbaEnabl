@@ -105,7 +105,7 @@ int main() {
 
 
         char buffer[BUFFER_SIZE];
-        char wrt_buffer[BUFFER_SIZE];
+        // char wrt_buffer[BUFFER_SIZE];
         char *packet = NULL;
         size_t packet_size = 0;
 
@@ -134,13 +134,27 @@ int main() {
                 cleanup(sockfd, -1, NULL);
                 exit(EXIT_FAILURE);
             }
-            res = fread(wrt_buffer, 1, sizeof(wrt_buffer), fp);
-            printf("Sending file content: %.*s", res, wrt_buffer); // Debugging print
-            if (send(fd, wrt_buffer, res, 0) == -1) {
-                perror("send error");
-                break;
+            // res = fread(wrt_buffer, 1, sizeof(wrt_buffer), fp);
+            // printf("Sending file content: %.*s", res, wrt_buffer); // Debugging print
+            // if (send(fd, wrt_buffer, res, 0) == -1) {
+            //     perror("send error");
+            //     break;
+            // }
+             
+            // Read the file in chunks of BUFFER_SIZE
+            size_t bytesRead;
+            while ((bytesRead = fread(buffer, 1, BUFFER_SIZE, file)) > 0) {
+                // Null-terminate the buffer for safe printing
+                buffer[bytesRead] = '\0';
+                // Print the buffer content
+                printf("%s", buffer);
             }
-                    
+                // Check for reading errors
+            if (ferror(file)) {
+                perror("Error reading file");
+                fclose(file);
+                return EXIT_FAILURE;
+            }
             fclose(fp);
 
         }
