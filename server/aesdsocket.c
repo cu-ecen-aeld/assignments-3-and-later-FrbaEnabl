@@ -18,7 +18,7 @@ static volatile sig_atomic_t run_flag = 1;
 
 void handle_signal(int signal) {
     syslog(LOG_INFO, "Caught signal, exiting");
-    exit(1);    
+    run_flag = 0; 
 }
 
 void cleanup(int sockfd, int fd, FILE *fp) {
@@ -27,6 +27,33 @@ void cleanup(int sockfd, int fd, FILE *fp) {
     if (sockfd != -1) close(sockfd);
     remove(SOCKET_FILE);
     closelog();
+}
+
+void write_to_file(const char *data) {
+    FILE *fp = fopen(SOCKET_FILE, "a");
+    if (fp) {
+        fprintf(fp, "%s", data);
+        fclose(fp);
+    } else {
+        perror("File open error");
+    }
+}
+
+void send_file_contents(int fd) {
+    FILE *fp = fopen(SOCKET_FILE, "r");
+    if (fp) {
+        char file_buffer[BUFFER_SIZE];
+        size_t bytes_read;
+        while ((bytes_read = fread(file_buffer, 1, sizeof(file_buffer), fp)) > 0) {
+            if (send(fd, file_buffer, bytes_read, 0) == -1) {
+                perror("send error");
+                break;
+            }
+        }
+        fclose(fp);
+    } else {
+        perror("File open error");
+    }
 }
 
 int main() {
@@ -96,7 +123,7 @@ int main() {
         }
 
         char client_ip[INET_ADDRSTRLEN];
-        struct sockaddr_in *client_addr = (struct sockaddr_in *) &addr;
+        struct sockaddr_in *client_addr = (struct sockaddr_in *)&addr;
         inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
         syslog(LOG_INFO, "Accepted connection from %s", client_ip);
 
@@ -110,38 +137,24 @@ int main() {
 
             if (newline_pos) {
                 size_t part_size = newline_pos - buffer + 1;
-                packet = realloc(packet, packet_size + part_size + 1);
+                char *new_packet = realloc(packet, packet_size + part_size + 1);
+                if (!new_packet) {
+                    perror("Memory allocation error");
+                    free(packet);
+                    cleanup(sockfd, fd, NULL);
+                    exit(EXIT_FAILURE);
+                }
+                packet = new_packet;
+
                 memcpy(packet + packet_size, buffer, part_size);
                 packet_size += part_size;
                 packet[packet_size] = '\0';
 
-                // Print the message received
                 printf("Received message: %s", packet);
 
-                // Append the message to the file
-                FILE *fp = fopen(SOCKET_FILE, "a");
-                if (fp) {
-                    fprintf(fp, "%s", packet);
-                    fclose(fp);
-                } else {
-                    perror("File open error");
-                }
+                write_to_file(packet);
 
-                // Send the entire contents of the file back to the client
-                fp = fopen(SOCKET_FILE, "r");
-                if (fp) {
-                    char file_buffer[BUFFER_SIZE];
-                    size_t bytes_read;
-                    while ((bytes_read = fread(file_buffer, 1, sizeof(file_buffer), fp)) > 0) {
-                        if (send(fd, file_buffer, bytes_read, 0) == -1) {
-                            perror("send error");
-                            break;
-                        }
-                    }
-                    fclose(fp);
-                } else {
-                    perror("File open error");
-                }
+                send_file_contents(fd);
 
                 free(packet);
                 packet = NULL;
@@ -149,25 +162,36 @@ int main() {
 
                 size_t remaining_size = res - part_size;
                 if (remaining_size > 0) {
-                    memcpy(buffer, buffer + part_size, remaining_size);
-                    buffer[remaining_size] = '\0';
+                    new_packet = realloc(packet, remaining_size + 1);
+                    if (!new_packet) {
+                        perror("Memory allocation error");
+                        free(packet);
+                        cleanup(sockfd, fd, NULL);
+                        exit(EXIT_FAILURE);
+                    }
+                    packet = new_packet;
 
-                    packet = realloc(packet, remaining_size + 1);
-                    memcpy(packet, buffer, remaining_size);
+                    memcpy(packet, buffer + part_size, remaining_size);
                     packet_size = remaining_size;
                     packet[packet_size] = '\0';
                 }
             } else {
-                packet = realloc(packet, packet_size + res + 1);
+                char *new_packet = realloc(packet, packet_size + res + 1);
+                if (!new_packet) {
+                    perror("Memory allocation error");
+                    free(packet);
+                    cleanup(sockfd, fd, NULL);
+                    exit(EXIT_FAILURE);
+                }
+                packet = new_packet;
+
                 memcpy(packet + packet_size, buffer, res);
                 packet_size += res;
                 packet[packet_size] = '\0';
             }
         }
 
-        if (packet) {
-            free(packet);
-        }
+        free(packet);
 
         if (res == -1) {
             perror("recv error");
