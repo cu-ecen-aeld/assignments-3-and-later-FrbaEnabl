@@ -85,9 +85,9 @@ void daemonize() {
         exit(EXIT_FAILURE);
     }
 
-    for (int x = sysconf(_SC_OPEN_MAX); x >= 0; x--) {
-        close(x);
-    }
+    // for (int x = sysconf(_SC_OPEN_MAX); x >= 0; x--) {
+    //     close(x);
+    // }
 
     int fd = open("/dev/null", O_RDWR);
     if (fd != -1) {
