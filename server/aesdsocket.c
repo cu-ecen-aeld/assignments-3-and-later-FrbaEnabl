@@ -17,9 +17,8 @@
 static volatile sig_atomic_t run_flag = 1;
 
 void handle_signal(int signal) {
-    syslog(LOG_INFO, "Caught signal, exiting");
+    syslog(LOG_INFO, "Caught signal %d, exiting", signal);
     run_flag = 0;
-    printf("Signal %d received!\n", signal);
 }
 
 void cleanup(int sockfd, int fd, FILE *fp) {
@@ -57,7 +56,64 @@ void send_file_contents(int fd) {
     }
 }
 
-int main() {
+void daemonize() {
+    pid_t pid = fork();
+    if (pid < 0) {
+        perror("fork error");
+        exit(EXIT_FAILURE);
+    }
+    if (pid > 0) {
+        exit(EXIT_SUCCESS); // Terminate the parent process
+    }
+
+    // Start a new session
+    if (setsid() < 0) {
+        perror("setsid error");
+        exit(EXIT_FAILURE);
+    }
+
+    // Fork again to avoid acquiring a controlling terminal
+    pid = fork();
+    if (pid < 0) {
+        perror("fork error");
+        exit(EXIT_FAILURE);
+    }
+    if (pid > 0) {
+        exit(EXIT_SUCCESS); // Terminate the parent process
+    }
+
+    // Change the current working directory to root
+    if (chdir("/") < 0) {
+        perror("chdir error");
+        exit(EXIT_FAILURE);
+    }
+
+    // Close all file descriptors
+    for (int x = sysconf(_SC_OPEN_MAX); x >= 0; x--) {
+        close(x);
+    }
+
+    // Redirect standard I/O to /dev/null
+    open("/dev/null", O_RDWR); // stdin
+    dup(0); // stdout
+    dup(0); // stderr
+}
+
+int main(int argc, char *argv[]) {
+    int daemon_mode = 0;
+    int opt;
+
+    while ((opt = getopt(argc, argv, "d")) != -1) {
+        switch (opt) {
+            case 'd':
+                daemon_mode = 1;
+                break;
+            default:
+                fprintf(stderr, "Usage: %s [-d]\n", argv[0]);
+                exit(EXIT_FAILURE);
+        }
+    }
+
     openlog("aesdsocket", LOG_PID, LOG_USER);
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
@@ -69,6 +125,7 @@ int main() {
     }
     fclose(fp);
 
+    // Set up socket connection
     int sockfd = -1, fd = -1;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
@@ -111,26 +168,31 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    // Daemonize after binding to port is successful
+    if (daemon_mode) {
+        daemonize();
+    }
+
     while (run_flag) {
         fd_set readfds;
         FD_ZERO(&readfds);
         FD_SET(sockfd, &readfds);
 
         struct timeval timeout;
-        timeout.tv_sec = 1; // Time to wait in seconds
+        timeout.tv_sec = 1;
         timeout.tv_usec = 0;
 
         res = select(sockfd + 1, &readfds, NULL, NULL, &timeout);
         if (res == -1) {
             if (errno == EINTR)
-                continue; // Interrupted by signal
+                continue;
             perror("select error");
             cleanup(sockfd, fd, NULL);
             exit(EXIT_FAILURE);
         }
 
         if (res == 0)
-            continue; // Timeout, loop back to check run_flag
+            continue;
 
         if (FD_ISSET(sockfd, &readfds)) {
             struct sockaddr addr;
