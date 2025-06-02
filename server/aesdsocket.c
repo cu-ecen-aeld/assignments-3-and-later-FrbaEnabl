@@ -115,6 +115,9 @@ int main() {
                 packet_size += part_size;
                 packet[packet_size] = '\0';
 
+                // Print the message received
+                printf("Received message: %s", packet);
+
                 FILE *fp = fopen(SOCKET_FILE, "a");
                 if (fp) {
                     fprintf(fp, "%s", packet);
