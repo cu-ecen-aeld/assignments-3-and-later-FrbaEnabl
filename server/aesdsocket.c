@@ -34,7 +34,6 @@ int main() {
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
 
-    // Open the file with write mode to clear its contents at the start
     FILE *fp = fopen(SOCKET_FILE, "w");
     if (!fp) {
         perror("File open error");
@@ -49,7 +48,6 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    // Set the SO_REUSEADDR option
     int optval = 1;
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
         perror("setsockopt error");
@@ -83,7 +81,7 @@ int main() {
         perror("listen error");
         cleanup(sockfd, fd, NULL);
         exit(EXIT_FAILURE);
-        }
+    }
 
     while (run_flag) {
         printf("RUN\n");
@@ -91,7 +89,7 @@ int main() {
         socklen_t addrlen = sizeof(addr);
         fd = accept(sockfd, &addr, &addrlen);
         if (fd == -1) {
-            if (errno == EINTR) continue; // Interrupted by signal, retry
+            if (errno == EINTR) continue;
             perror("accept error");
             cleanup(sockfd, fd, NULL);
             exit(EXIT_FAILURE);
@@ -102,76 +100,62 @@ int main() {
         inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
         syslog(LOG_INFO, "Accepted connection from %s", client_ip);
 
-
-
         char buffer[BUFFER_SIZE];
-        char wrt_buffer[BUFFER_SIZE];
         char *packet = NULL;
         size_t packet_size = 0;
 
         while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
-            FILE *fp = fopen(SOCKET_FILE, "a");
-            if (!fp) {
-                perror("File open error");
-                close(fd);
-                continue;
-            }
-            printf("BLIB\n");
             buffer[res] = '\0';
+            char *newline_pos = strchr(buffer, '\n');
 
-            // Debugging print to show received data
-            printf("Received buffer: %s\n", buffer);
+            if (newline_pos) {
+                size_t part_size = newline_pos - buffer + 1;
+                packet = realloc(packet, packet_size + part_size + 1);
+                memcpy(packet + packet_size, buffer, part_size);
+                packet_size += part_size;
+                packet[packet_size] = '\0';
 
-            int f_res = fprintf(fp, "%s", buffer);
-            printf("Bytes written: %d\n", f_res);
-            fclose(fp);
-            fp = fopen(SOCKET_FILE, "r");
-            if (!fp) {
-                printf("OPENING ERROR\n");
-                perror("File reopen error");
-                // free(packet);
-                close(fd);
-                cleanup(sockfd, -1, NULL);
-                exit(EXIT_FAILURE);
-            }
-            // res = fread(wrt_buffer, 1, sizeof(wrt_buffer), fp);
-            // printf("Sending file content: %.*s", res, wrt_buffer); // Debugging print
-            // if (send(fd, wrt_buffer, res, 0) == -1) {
-            //     perror("send error");
-            //     break;
-            // }
-            
-            // Read the file in chunks of BUFFER_SIZE
-            size_t bytesRead;
-            while ((bytesRead = fread(wrt_buffer, 1, BUFFER_SIZE, fp)) > 0) {
-                // Null-terminate the buffer for safe printing
-                buffer[bytesRead] = '\0';
-                // Print the buffer content
-                printf("Sending file content: %.*s", bytesRead, wrt_buffer); // Debugging print
-                if (send(fd, wrt_buffer, bytesRead, 0) == -1) {
-                    perror("send error");
-                    break;
+                FILE *fp = fopen(SOCKET_FILE, "a");
+                if (fp) {
+                    fprintf(fp, "%s", packet);
+                    fclose(fp);
+                } else {
+                    perror("File open error");
                 }
-            }
-                // Check for reading errors
-            if (ferror(fp)) {
-                perror("Error reading fp");
-                fclose(fp);
-                return EXIT_FAILURE;
-            }
-            fclose(fp);
 
+                free(packet);
+                packet = NULL;
+                packet_size = 0;
+
+                size_t remaining_size = res - part_size;
+                if (remaining_size > 0) {
+                    memcpy(buffer, buffer + part_size, remaining_size);
+                    buffer[remaining_size] = '\0';
+
+                    packet = realloc(packet, remaining_size + 1);
+                    memcpy(packet, buffer, remaining_size);
+                    packet_size = remaining_size;
+                    packet[packet_size] = '\0';
+                }
+            } else {
+                packet = realloc(packet, packet_size + res + 1);
+                memcpy(packet + packet_size, buffer, res);
+                packet_size += res;
+                packet[packet_size] = '\0';
+            }
         }
-            
+
+        if (packet) {
+            free(packet);
+        }
+
         if (res == -1) {
             perror("recv error");
         }
 
         syslog(LOG_INFO, "Closed connection from %s", client_ip);
-        free(packet);
-        // fclose(fp);
         close(fd);
-        fd = -1; // Reset fd for the next loop
+        fd = -1;
     }
 
     cleanup(sockfd, fd, NULL);
