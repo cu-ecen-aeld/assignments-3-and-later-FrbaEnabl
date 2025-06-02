@@ -94,9 +94,9 @@ void daemonize() {
     }
 
     // Redirect standard I/O to /dev/null
-    open("/dev/null", O_RDWR); // stdin
-    dup(0); // stdout
-    dup(0); // stderr
+    // open("/dev/null", O_RDWR); // stdin
+    // dup(0); // stdout
+    // dup(0); // stderr
 }
 
 int main(int argc, char *argv[]) {
