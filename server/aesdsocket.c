@@ -140,14 +140,18 @@ int main() {
             //     perror("send error");
             //     break;
             // }
-             
+            
             // Read the file in chunks of BUFFER_SIZE
             size_t bytesRead;
             while ((bytesRead = fread(wrt_buffer, 1, BUFFER_SIZE, fp)) > 0) {
                 // Null-terminate the buffer for safe printing
                 buffer[bytesRead] = '\0';
                 // Print the buffer content
-                printf("%s", wrt_buffer);
+                printf("Sending file content: %.*s", bytesRead, wrt_buffer); // Debugging print
+                if (send(fd, wrt_buffer, bytesRead, 0) == -1) {
+                    perror("send error");
+                    break;
+                }
             }
                 // Check for reading errors
             if (ferror(fp)) {
