@@ -143,7 +143,7 @@ int main() {
              
             // Read the file in chunks of BUFFER_SIZE
             size_t bytesRead;
-            while ((bytesRead = fread(buffer, 1, BUFFER_SIZE, file)) > 0) {
+            while ((bytesRead = fread(buffer, 1, BUFFER_SIZE, fp)) > 0) {
                 // Null-terminate the buffer for safe printing
                 buffer[bytesRead] = '\0';
                 // Print the buffer content
