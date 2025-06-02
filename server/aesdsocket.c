@@ -118,12 +118,18 @@ int main() {
                 // Print the message received
                 printf("Received message: %s", packet);
 
+                // Append the message to the file
                 FILE *fp = fopen(SOCKET_FILE, "a");
                 if (fp) {
                     fprintf(fp, "%s", packet);
                     fclose(fp);
                 } else {
                     perror("File open error");
+                }
+
+                // Send the message back to the client
+                if (send(fd, packet, packet_size, 0) == -1) {
+                    perror("send error");
                 }
 
                 free(packet);
