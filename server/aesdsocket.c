@@ -16,6 +16,7 @@
 #define SOCKET_FILE "/var/tmp/aesdsocketdata"
 
 static volatile sig_atomic_t run_flag = 1;
+pthread_mutex_t file_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Structure to pass multiple arguments to the thread function
 typedef struct {
@@ -34,9 +35,11 @@ void cleanup(int sockfd, int fd, FILE *fp) {
     if (sockfd != -1) close(sockfd);
     remove(SOCKET_FILE);
     closelog();
+    pthread_mutex_destroy(&file_mutex);  // Destroy the mutex
 }
 
 void write_to_file(const char *data) {
+    pthread_mutex_lock(&file_mutex);  // Lock the mutex
     FILE *fp = fopen(SOCKET_FILE, "a");
     if (!fp) {
         syslog(LOG_ERR, "File open error: %s", strerror(errno));
@@ -44,9 +47,11 @@ void write_to_file(const char *data) {
         fprintf(fp, "%s", data);
         fclose(fp);
     }
+    pthread_mutex_unlock(&file_mutex);  // Unlock the mutex
 }
 
 void send_file_contents(int fd) {
+    pthread_mutex_lock(&file_mutex);  // Lock the mutex to ensure consistency when reading
     FILE *fp = fopen(SOCKET_FILE, "r");
     if (!fp) {
         syslog(LOG_ERR, "File open error: %s", strerror(errno));
@@ -61,6 +66,7 @@ void send_file_contents(int fd) {
         }
         fclose(fp);
     }
+    pthread_mutex_unlock(&file_mutex);  // Unlock the mutex
 }
 
 void daemonize() {
@@ -212,6 +218,8 @@ int main(int argc, char *argv[]) {
 
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
+
+    pthread_mutex_init(&file_mutex, NULL);  // Initialize the mutex
 
     FILE *fp = fopen(SOCKET_FILE, "w");
     if (!fp) {
