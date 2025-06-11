@@ -10,11 +10,18 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <pthread.h>
 
 #define BUFFER_SIZE 1024
 #define SOCKET_FILE "/var/tmp/aesdsocketdata"
 
 static volatile sig_atomic_t run_flag = 1;
+
+// Structure to pass multiple arguments to the thread function
+typedef struct {
+    int client_socket;
+    struct sockaddr addr;
+} client_info_t;
 
 void handle_signal(int signal) {
     syslog(LOG_INFO, "Caught signal %d, exiting", signal);
@@ -85,10 +92,6 @@ void daemonize() {
         exit(EXIT_FAILURE);
     }
 
-    // for (int x = sysconf(_SC_OPEN_MAX); x >= 0; x--) {
-    //     close(x);
-    // }
-
     int fd = open("/dev/null", O_RDWR);
     if (fd != -1) {
         dup2(fd, STDIN_FILENO);
@@ -99,6 +102,94 @@ void daemonize() {
         syslog(LOG_ERR, "Failed to open /dev/null: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
+}
+
+// Thread function to handle client connection
+void *handle_client(void *arg) {
+    client_info_t *cinfo = (client_info_t *)arg;
+    int fd = cinfo->client_socket;
+    struct sockaddr addr = cinfo->addr;
+    char client_ip[INET_ADDRSTRLEN];
+    struct sockaddr_in *client_addr = (struct sockaddr_in *)&addr;
+
+    inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
+    syslog(LOG_INFO, "Accepted connection from %s", client_ip);
+
+    char buffer[BUFFER_SIZE];
+    char *packet = NULL;
+    size_t packet_size = 0;
+
+    ssize_t res;
+    while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
+        buffer[res] = '\0';
+        char *newline_pos = strchr(buffer, '\n');
+
+        if (newline_pos) {
+            size_t part_size = newline_pos - buffer + 1;
+            char *new_packet = realloc(packet, packet_size + part_size + 1);
+            if (!new_packet) {
+                syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
+                free(packet);
+                close(fd);
+                pthread_exit(NULL);
+            }
+            packet = new_packet;
+
+            memcpy(packet + packet_size, buffer, part_size);
+            packet_size += part_size;
+            packet[packet_size] = '\0';
+
+            syslog(LOG_INFO, "Received message: %s", packet);
+
+            write_to_file(packet);
+
+            send_file_contents(fd);
+
+            free(packet);
+            packet = NULL;
+            packet_size = 0;
+
+            size_t remaining_size = res - part_size;
+            if (remaining_size > 0) {
+                new_packet = realloc(packet, remaining_size + 1);
+                if (!new_packet) {
+                    syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
+                    free(packet);
+                    close(fd);
+                    pthread_exit(NULL);
+                }
+                packet = new_packet;
+
+                memcpy(packet, buffer + part_size, remaining_size);
+                packet_size = remaining_size;
+                packet[packet_size] = '\0';
+            }
+        } else {
+            char *new_packet = realloc(packet, packet_size + res + 1);
+            if (!new_packet) {
+                syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
+                free(packet);
+                close(fd);
+                pthread_exit(NULL);
+            }
+            packet = new_packet;
+
+            memcpy(packet + packet_size, buffer, res);
+            packet_size += res;
+            packet[packet_size] = '\0';
+        }
+    }
+
+    free(packet);
+
+    if (res == -1) {
+        syslog(LOG_ERR, "recv error: %s", strerror(errno));
+    }
+
+    syslog(LOG_INFO, "Closed connection from %s", client_ip);
+    close(fd);
+    free(cinfo);
+    pthread_exit(NULL);
 }
 
 int main(int argc, char *argv[]) {
@@ -129,7 +220,7 @@ int main(int argc, char *argv[]) {
     }
     fclose(fp);
 
-    int sockfd = -1, fd = -1;
+    int sockfd = -1;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
         syslog(LOG_ERR, "Socket creation error: %s", strerror(errno));
@@ -139,7 +230,7 @@ int main(int argc, char *argv[]) {
     int optval = 1;
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
         syslog(LOG_ERR, "setsockopt error: %s", strerror(errno));
-        cleanup(sockfd, fd, NULL);
+        cleanup(sockfd, -1, NULL);
         exit(EXIT_FAILURE);
     }
 
@@ -152,7 +243,7 @@ int main(int argc, char *argv[]) {
     int res = getaddrinfo(NULL, "9000", &hints, &servinfo);
     if (res != 0) {
         syslog(LOG_ERR, "getaddrinfo error: %s", gai_strerror(res));
-        cleanup(sockfd, fd, NULL);
+        cleanup(sockfd, -1, NULL);
         exit(EXIT_FAILURE);
     }
 
@@ -160,14 +251,14 @@ int main(int argc, char *argv[]) {
     if (res != 0) {
         syslog(LOG_ERR, "bind error: %s", strerror(errno));
         freeaddrinfo(servinfo);
-        cleanup(sockfd, fd, NULL);
+        cleanup(sockfd, -1, NULL);
         exit(EXIT_FAILURE);
     }
     freeaddrinfo(servinfo);
 
     if (listen(sockfd, 5) != 0) {
         syslog(LOG_ERR, "listen error: %s", strerror(errno));
-        cleanup(sockfd, fd, NULL);
+        cleanup(sockfd, -1, NULL);
         exit(EXIT_FAILURE);
     }
 
@@ -189,7 +280,7 @@ int main(int argc, char *argv[]) {
             if (errno == EINTR)
                 continue;
             syslog(LOG_ERR, "select error: %s", strerror(errno));
-            cleanup(sockfd, fd, NULL);
+            cleanup(sockfd, -1, NULL);
             exit(EXIT_FAILURE);
         }
 
@@ -199,96 +290,38 @@ int main(int argc, char *argv[]) {
         if (FD_ISSET(sockfd, &readfds)) {
             struct sockaddr addr;
             socklen_t addrlen = sizeof(addr);
-            fd = accept(sockfd, &addr, &addrlen);
+            int fd = accept(sockfd, &addr, &addrlen);
             if (fd == -1) {
                 if (errno == EINTR) continue;
                 syslog(LOG_ERR, "accept error: %s", strerror(errno));
-                cleanup(sockfd, fd, NULL);
+                cleanup(sockfd, -1, NULL);
                 exit(EXIT_FAILURE);
             }
 
-            char client_ip[INET_ADDRSTRLEN];
-            struct sockaddr_in *client_addr = (struct sockaddr_in *)&addr;
-            inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
-            syslog(LOG_INFO, "Accepted connection from %s", client_ip);
+            // Allocate memory for client information
+            client_info_t *cinfo = malloc(sizeof(client_info_t));
+            if (!cinfo) {
+                syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
+                close(fd);
+                continue;
+            }
+            cinfo->client_socket = fd;
+            memcpy(&cinfo->addr, &addr, sizeof(struct sockaddr));
 
-            char buffer[BUFFER_SIZE];
-            char *packet = NULL;
-            size_t packet_size = 0;
-
-            while ((res = recv(fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
-                buffer[res] = '\0';
-                char *newline_pos = strchr(buffer, '\n');
-
-                if (newline_pos) {
-                    size_t part_size = newline_pos - buffer + 1;
-                    char *new_packet = realloc(packet, packet_size + part_size + 1);
-                    if (!new_packet) {
-                        syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
-                        free(packet);
-                        cleanup(sockfd, fd, NULL);
-                        exit(EXIT_FAILURE);
-                    }
-                    packet = new_packet;
-
-                    memcpy(packet + packet_size, buffer, part_size);
-                    packet_size += part_size;
-                    packet[packet_size] = '\0';
-
-                    syslog(LOG_INFO, "Received message: %s", packet);
-
-                    write_to_file(packet);
-
-                    send_file_contents(fd);
-
-                    free(packet);
-                    packet = NULL;
-                    packet_size = 0;
-
-                    size_t remaining_size = res - part_size;
-                    if (remaining_size > 0) {
-                        new_packet = realloc(packet, remaining_size + 1);
-                        if (!new_packet) {
-                            syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
-                            free(packet);
-                            cleanup(sockfd, fd, NULL);
-                            exit(EXIT_FAILURE);
-                        }
-                        packet = new_packet;
-
-                        memcpy(packet, buffer + part_size, remaining_size);
-                        packet_size = remaining_size;
-                        packet[packet_size] = '\0';
-                    }
-                } else {
-                    char *new_packet = realloc(packet, packet_size + res + 1);
-                    if (!new_packet) {
-                        syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
-                        free(packet);
-                        cleanup(sockfd, fd, NULL);
-                        exit(EXIT_FAILURE);
-                    }
-                    packet = new_packet;
-
-                    memcpy(packet + packet_size, buffer, res);
-                    packet_size += res;
-                    packet[packet_size] = '\0';
-                }
+            // Create a new thread for each client connection
+            pthread_t thread_id;
+            if (pthread_create(&thread_id, NULL, handle_client, cinfo) != 0) {
+                syslog(LOG_ERR, "pthread_create error: %s", strerror(errno));
+                free(cinfo);
+                close(fd);
             }
 
-            free(packet);
-
-            if (res == -1) {
-                syslog(LOG_ERR, "recv error: %s", strerror(errno));
-            }
-
-            syslog(LOG_INFO, "Closed connection from %s", client_ip);
-            close(fd);
-            fd = -1;
+            // Detach the thread so that it cleans up itself after completion
+            pthread_detach(thread_id);
         }
     }
 
     syslog(LOG_INFO, "Program terminated");
-    cleanup(sockfd, fd, NULL);
+    cleanup(sockfd, -1, NULL);
     return 0;
 }
