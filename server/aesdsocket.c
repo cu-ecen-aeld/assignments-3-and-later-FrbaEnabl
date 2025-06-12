@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <pthread.h>
+#include <time.h>
 
 #define BUFFER_SIZE 1024
 #define SOCKET_FILE "/var/tmp/aesdsocketdata"
@@ -97,6 +98,20 @@ void send_file_contents(int fd) {
         fclose(fp);
     }
     pthread_mutex_unlock(&file_mutex);
+}
+
+void *timestamp_thread(void *arg) {
+    while (run_flag) {
+        sleep(10);
+
+        time_t now = time(NULL);
+        struct tm *timeinfo = localtime(&now);
+        char time_buffer[100];
+
+        strftime(time_buffer, sizeof(time_buffer), "timestamp: %a, %d %b %Y %H:%M:%S %z\n", timeinfo);
+        write_to_file(time_buffer);
+    }
+    pthread_exit(NULL);
 }
 
 void daemonize() {
@@ -303,6 +318,13 @@ int main(int argc, char *argv[]) {
         daemonize();
     }
 
+    pthread_t timestamp_tid;
+    if (pthread_create(&timestamp_tid, NULL, timestamp_thread, NULL) != 0) {
+        syslog(LOG_ERR, "Failed to create timestamp thread");
+        cleanup(sockfd, -1, NULL);
+        exit(EXIT_FAILURE);
+    }
+
     while (run_flag) {
         fd_set readfds;
         FD_ZERO(&readfds);
@@ -364,7 +386,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    join_and_clean_threads();  // Wait for all threads to finish
+    pthread_join(timestamp_tid, NULL);
+    join_and_clean_threads();
 
     syslog(LOG_INFO, "Program terminated");
     cleanup(sockfd, -1, NULL);
