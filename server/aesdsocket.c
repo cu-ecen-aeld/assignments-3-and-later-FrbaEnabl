@@ -18,11 +18,19 @@
 static volatile sig_atomic_t run_flag = 1;
 pthread_mutex_t file_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-// Structure to pass multiple arguments to the thread function
 typedef struct {
     int client_socket;
     struct sockaddr addr;
 } client_info_t;
+
+typedef struct thread_node {
+    pthread_t thread_id;
+    client_info_t *cinfo;
+    struct thread_node *next;
+} thread_node_t;
+
+thread_node_t *head = NULL;
+pthread_mutex_t list_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void handle_signal(int signal) {
     syslog(LOG_INFO, "Caught signal %d, exiting", signal);
@@ -35,11 +43,33 @@ void cleanup(int sockfd, int fd, FILE *fp) {
     if (sockfd != -1) close(sockfd);
     remove(SOCKET_FILE);
     closelog();
-    pthread_mutex_destroy(&file_mutex);  // Destroy the mutex
+    pthread_mutex_destroy(&file_mutex);
+    pthread_mutex_destroy(&list_mutex);
+}
+
+void add_thread(thread_node_t *node) {
+    pthread_mutex_lock(&list_mutex);
+    node->next = head;
+    head = node;
+    pthread_mutex_unlock(&list_mutex);
+}
+
+void join_and_clean_threads() {
+    pthread_mutex_lock(&list_mutex);
+    thread_node_t *current = head;
+    while (current != NULL) {
+        pthread_join(current->thread_id, NULL);
+        free(current->cinfo);
+        thread_node_t *temp = current;
+        current = current->next;
+        free(temp);
+    }
+    head = NULL;
+    pthread_mutex_unlock(&list_mutex);
 }
 
 void write_to_file(const char *data) {
-    pthread_mutex_lock(&file_mutex);  // Lock the mutex
+    pthread_mutex_lock(&file_mutex);
     FILE *fp = fopen(SOCKET_FILE, "a");
     if (!fp) {
         syslog(LOG_ERR, "File open error: %s", strerror(errno));
@@ -47,11 +77,11 @@ void write_to_file(const char *data) {
         fprintf(fp, "%s", data);
         fclose(fp);
     }
-    pthread_mutex_unlock(&file_mutex);  // Unlock the mutex
+    pthread_mutex_unlock(&file_mutex);
 }
 
 void send_file_contents(int fd) {
-    pthread_mutex_lock(&file_mutex);  // Lock the mutex to ensure consistency when reading
+    pthread_mutex_lock(&file_mutex);
     FILE *fp = fopen(SOCKET_FILE, "r");
     if (!fp) {
         syslog(LOG_ERR, "File open error: %s", strerror(errno));
@@ -66,7 +96,7 @@ void send_file_contents(int fd) {
         }
         fclose(fp);
     }
-    pthread_mutex_unlock(&file_mutex);  // Unlock the mutex
+    pthread_mutex_unlock(&file_mutex);
 }
 
 void daemonize() {
@@ -76,7 +106,7 @@ void daemonize() {
         exit(EXIT_FAILURE);
     }
     if (pid > 0) {
-        exit(EXIT_SUCCESS); // Terminate the parent process
+        exit(EXIT_SUCCESS);
     }
 
     if (setsid() < 0) {
@@ -90,7 +120,7 @@ void daemonize() {
         exit(EXIT_FAILURE);
     }
     if (pid > 0) {
-        exit(EXIT_SUCCESS); // Terminate the parent process
+        exit(EXIT_SUCCESS);
     }
 
     if (chdir("/") < 0) {
@@ -110,7 +140,6 @@ void daemonize() {
     }
 }
 
-// Thread function to handle client connection
 void *handle_client(void *arg) {
     client_info_t *cinfo = (client_info_t *)arg;
     int fd = cinfo->client_socket;
@@ -219,7 +248,7 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
 
-    pthread_mutex_init(&file_mutex, NULL);  // Initialize the mutex
+    pthread_mutex_init(&file_mutex, NULL);
 
     FILE *fp = fopen(SOCKET_FILE, "w");
     if (!fp) {
@@ -306,7 +335,6 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
             }
 
-            // Allocate memory for client information
             client_info_t *cinfo = malloc(sizeof(client_info_t));
             if (!cinfo) {
                 syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
@@ -316,18 +344,27 @@ int main(int argc, char *argv[]) {
             cinfo->client_socket = fd;
             memcpy(&cinfo->addr, &addr, sizeof(struct sockaddr));
 
-            // Create a new thread for each client connection
-            pthread_t thread_id;
-            if (pthread_create(&thread_id, NULL, handle_client, cinfo) != 0) {
-                syslog(LOG_ERR, "pthread_create error: %s", strerror(errno));
+            thread_node_t *new_node = malloc(sizeof(thread_node_t));
+            if (!new_node) {
+                syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
                 free(cinfo);
                 close(fd);
+                continue;
             }
+            new_node->cinfo = cinfo;
 
-            // Detach the thread so that it cleans up itself after completion
-            pthread_detach(thread_id);
+            if (pthread_create(&new_node->thread_id, NULL, handle_client, cinfo) != 0) {
+                syslog(LOG_ERR, "pthread_create error: %s", strerror(errno));
+                free(cinfo);
+                free(new_node);
+                close(fd);
+            } else {
+                add_thread(new_node);
+            }
         }
     }
+
+    join_and_clean_threads();  // Wait for all threads to finish
 
     syslog(LOG_INFO, "Program terminated");
     cleanup(sockfd, -1, NULL);
