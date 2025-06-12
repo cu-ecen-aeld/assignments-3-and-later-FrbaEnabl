@@ -102,7 +102,11 @@ void send_file_contents(int fd) {
 
 void *timestamp_thread(void *arg) {
     while (run_flag) {
-        sleep(10);
+        for (int i = 0; i < 10 && run_flag; i++) {
+            sleep(1);
+        }
+
+        if (!run_flag) break;
 
         time_t now = time(NULL);
         struct tm *timeinfo = localtime(&now);
