@@ -18,7 +18,7 @@ $(TARGET): $(OBJS)
 
 # Rule to build .o files
 %.o: %.c
-	$(CC) $(CFLAGS) $^ -o $@ $(INCLUDES) $(LDFLAGS)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Clean target to remove output files
 clean:
