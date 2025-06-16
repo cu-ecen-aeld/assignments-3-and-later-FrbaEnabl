@@ -1,9 +1,9 @@
 # Makefile for building the "aesdsocket " application
 
 # Compiler and target settings
-CC = $(CROSS_COMPILE)gcc
-CFLAGS = -Wall -Wextra -O2
-TARGET = aesdsocket
+CC ?= $(CROSS_COMPILE)gcc
+CFLAGS ?= -Wall -Wextra -O2
+TARGET ?= aesdsocket
 
 # Source files
 SRCS = aesdsocket.c
