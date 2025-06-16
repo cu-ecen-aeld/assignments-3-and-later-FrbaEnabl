@@ -1,28 +1,30 @@
-# Makefile for building the "aesdsocket " application
+# Compiler prefix (override from command line if needed)
+CROSS_COMPILE ?=
 
-# Compiler and target settings
+# CC will use CROSS_COMPILE prefix, evaluated at runtime
 CC ?= $(CROSS_COMPILE)gcc
-CFLAGS ?= -Wall -Wextra -O2
-TARGET ?= aesdsocket
-LDFLAGS ?= -lpthread -lrt
 
-# Source files
+# Compiler flags
+CFLAGS ?= -Wall -Werror -g
+
+# Target binary and sources
+TARGET ?= aesdsocket
 SRCS = aesdsocket.c
 OBJS = $(SRCS:.c=.o)
-# Default target: build the application
+
+LDFLAGS ?= -lpthread -lrt
+
+# Default target
 all: $(TARGET)
 
-# Rule to build the application
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
+default: all
 
-# Rule to build .o files
+# Build the target
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@ $(INCLUDES) $(LDFLAGS)
 
-# Clean target to remove output files
+# Clean target
 clean:
 	rm -f $(TARGET) $(OBJS)
 
-# Phony targets
 .PHONY: all clean
