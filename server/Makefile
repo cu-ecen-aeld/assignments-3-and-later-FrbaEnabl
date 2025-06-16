@@ -4,11 +4,11 @@
 CC ?= $(CROSS_COMPILE)gcc
 CFLAGS ?= -Wall -Wextra -O2
 TARGET ?= aesdsocket
+LDFLAGS ?= -lpthread -lrt
 
 # Source files
 SRCS = aesdsocket.c
 OBJS = $(SRCS:.c=.o)
-
 # Default target: build the application
 all: $(TARGET)
 
