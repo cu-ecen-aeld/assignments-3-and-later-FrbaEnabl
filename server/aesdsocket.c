@@ -115,7 +115,7 @@ void *timestamp_thread(void *arg) {
         strftime(time_buffer, sizeof(time_buffer), "timestamp: %a, %d %b %Y %H:%M:%S %z\n", timeinfo);
         write_to_file(time_buffer);
     }
-    pthread_exit(NULL);
+    return NULL;
 }
 
 void daemonize() {
@@ -185,7 +185,7 @@ void *handle_client(void *arg) {
                 syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
                 free(packet);
                 close(fd);
-                pthread_exit(NULL);
+                return NULL;
             }
             packet = new_packet;
 
@@ -210,7 +210,7 @@ void *handle_client(void *arg) {
                     syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
                     free(packet);
                     close(fd);
-                    pthread_exit(NULL);
+                    return NULL;
                 }
                 packet = new_packet;
 
@@ -224,7 +224,7 @@ void *handle_client(void *arg) {
                 syslog(LOG_ERR, "Memory allocation error: %s", strerror(errno));
                 free(packet);
                 close(fd);
-                pthread_exit(NULL);
+                return NULL;
             }
             packet = new_packet;
 
@@ -243,7 +243,7 @@ void *handle_client(void *arg) {
     syslog(LOG_INFO, "Closed connection from %s", client_ip);
     close(fd);
     free(cinfo);
-    pthread_exit(NULL);
+    return NULL;
 }
 
 int main(int argc, char *argv[]) {
