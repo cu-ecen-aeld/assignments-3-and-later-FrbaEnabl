@@ -1,4 +1,5 @@
 # Makefile for building the "aesdsocket " application
+CROSS_COMPILE ?=
 
 # Compiler and target settings
 CC ?= $(CROSS_COMPILE)gcc
